@@ -1,5 +1,4 @@
-module type MATRIX =
-sig
+module type MATRIX = sig
 
   exception NonSquare
   exception ImproperDimensions
