@@ -1,0 +1,10 @@
+
+*.cmi
+
+*.cmo
+
+*.cmx
+
+*.o
+
+algebra
