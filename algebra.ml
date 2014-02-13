@@ -72,6 +72,18 @@ module MatrixMartelliSemiring (Ord : Set.OrderedType) = struct
   
   module MS = MartelliSemiring(Ord)
 
+  let init_from_list n l =
+    if float_of_int (List.length l) = (float_of_int n) ** 2. then
+      let m = Array.make_matrix n n MS.zero in
+      for i = 0 to n - 1 do
+        for j = 0 to n - 1 do
+          m.(i).(j) <- List.nth l (i * n + j)
+        done;
+      done;
+      m
+    else
+      raise (Failure "Invalid dimension and list ")
+
   let plus n a b = 
     let m = Array.make_matrix n n MS.zero in
     for i = 0 to n - 1 do
