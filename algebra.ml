@@ -1,4 +1,4 @@
-(* module type SEMIRING = sig
+module type SEMIRING = sig
 
   type ele
 
@@ -28,7 +28,7 @@ module type MARTELLISEMIRING = sig
 
   val print_elements : t -> unit
 
-end *)
+end
 
 module MartelliSemiring (Ord : Set.OrderedType) = struct
 
