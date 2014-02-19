@@ -6,14 +6,6 @@ module type ELEMENT = sig
 
 end
 
-module type ELEMENTSET = sig
-
-  include Set.S
-
-  val print_elements : t -> string
-
-end
-
 module ElementSet (Ele : ELEMENT) = struct
   
   include Set.Make(Ele)
@@ -22,35 +14,16 @@ module ElementSet (Ele : ELEMENT) = struct
     let fold_element element s = Ele.to_string element ^ " " ^ s in
     fold fold_element elements ""
 
-end
-
-module type MARTELLISEMIRING = sig
-
-  type t
-
-  val reduce : t -> t 
-
-  val plus : t -> t -> t
-
-  val times : t -> t -> t
-
-  val zero : unit -> t
-
-  val one : unit -> t
-
-  val length : t -> int
-
-  val print_elements : t -> unit
+  let init_from_list l =
+    List.fold_left (fun s ele -> add ele s) empty l
 
 end
 
-module MartelliSemiring 
-  (Ele : ELEMENT)
-  (ES : ElementSet) : MARTELLISEMIRING = struct
+module MartelliSemiring (Ele : ELEMENT) = struct
 
   module S = ElementSet(Ele)
 
-  include Set.Make(ElementSet(Ele))
+  include Set.Make(S)
 
   let reduce a = 
     let not_subset set = for_all (fun a_set -> not (S.subset a_set set) || S.equal a_set set) a in
@@ -58,10 +31,16 @@ module MartelliSemiring
 
   let plus a b = 
     let fold_element a_set s = fold (fun b_set s_iter -> add (S.union a_set b_set) s_iter) b s in
-    reduce (fold fold_element a empty)
+    fold fold_element a empty
+
+  let plus_reduce a b = 
+    reduce (plus a b)
 
   let times a b =
-    reduce ( union a b )
+    union a b
+
+  let times a b =
+    reduce (times a b)
 
   let zero = empty
 
@@ -74,8 +53,11 @@ module MartelliSemiring
 
   let print_elements a = 
     print_endline "{";
-    iter (fun i -> print_string ("{ " ^ (S.print_elements i) ^ "}\n")) a;
-    print_endline "\n}"
+    iter (fun i -> print_endline ("\t{ " ^ (S.print_elements i) ^ "}")) a;
+    print_endline "}"
+
+  let init_from_list l = 
+    List.fold_left (fun ss inner_l -> add (S.init_from_list inner_l) ss) empty l
 
 end
 
@@ -146,30 +128,24 @@ module MatrixMartelliSemiring (Ele : ELEMENT) = struct
 end
 
 module MString = struct
-
   include String
-
   let to_string s = s
-
 end
 
 module MInt = struct
-
   include Int32
-
-  let to_string i = string_of_int
-
+  let to_string i = string_of_int i
 end
+
+module MS = MartelliSemiring(MString)
 
 let l1 = ["a"]
 let l2 = ["b"; "c";]
 let l3 = ["d"; "e"; "f"]
 let l4 = ["a"; "b"]
 
-module MS = MartelliSemiring(MString)
-
-(* let s1 = MS.init_from_list [l1;l2]
+let s1 = MS.init_from_list [l1;l2]
 let s2 = MS.init_from_list [l1;l2;l3]
-let s3 = MS.init_from_list [l1;l4] *)
+let s3 = MS.init_from_list [l1;l4]
 
   
