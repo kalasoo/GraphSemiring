@@ -1,8 +1,20 @@
+open Printf
+
 module type ELEMENT = sig
   
   include Set.OrderedType
 
   val to_string : t -> string
+
+end
+
+module Int = struct
+  
+  type t = int
+  
+  let compare = Pervasives.compare
+  
+  let to_string i = string_of_int i
 
 end
 
@@ -39,14 +51,14 @@ module MartelliSemiring (Ele : ELEMENT) = struct
   let times a b =
     union a b
 
-  let times a b =
+  let times_reduce a b =
     reduce (times a b)
 
-  let zero = empty
-
-  let one = 
+  let zero = 
     let s = empty in
     add S.empty s
+
+  let one = empty
 
   let length a =
     List.length ( elements a )
@@ -81,14 +93,14 @@ module MatrixMartelliSemiring (Ele : ELEMENT) = struct
     let m = Array.make_matrix n n MS.zero in
     for i = 0 to n - 1 do
       for j = 0 to n - 1 do
-        m.(i).(j) <- MS.plus a.(i).(j) b.(i).(j)
+        m.(i).(j) <- MS.plus_reduce a.(i).(j) b.(i).(j)
       done;
     done;
     m
 
   let inner_times n a_row b_col =
     let result = ref (MS.zero) in
-    Array.iteri (fun i a_i -> result := MS.plus !result (MS.times a_i b_col.(i)) ) a_row;
+    Array.iteri (fun i a_i -> result := MS.plus_reduce !result (MS.times_reduce a_i b_col.(i)) ) a_row;
     !result
 
   (* get jth column of m *)
@@ -117,7 +129,7 @@ module MatrixMartelliSemiring (Ele : ELEMENT) = struct
     Array.make_matrix n n MS.zero
 
   let one n = 
-    let m = Array.make_matrix n n MS.zero in
+    let m = zero n in
     for i = 0 to n - 1 do
       for j = 0 to n - 1 do
         if i = j then m.(i).(j) <- MS.one
@@ -125,27 +137,24 @@ module MatrixMartelliSemiring (Ele : ELEMENT) = struct
     done;
     m
 
+  let print_matrix n a = 
+    for i = 0 to n - 1 do
+      for j = 0 to n - 1 do
+        printf "\nrow %d, col %d\n" i j;
+        MS.print_elements a.(i).(j)
+      done;
+    done
+
+  let cutset n a =
+    let _a = ref(a)
+    and _m = ref(one n) in
+    for i = 0 to n - 1 do
+      printf "\nloop %d" i;
+      _m := plus  n !_m !_a;
+      _a := times n !_a a
+    done;
+    !_m
+
 end
-
-module MString = struct
-  include String
-  let to_string s = s
-end
-
-module MInt = struct
-  include Int32
-  let to_string i = string_of_int i
-end
-
-module MS = MartelliSemiring(MString)
-
-let l1 = ["a"]
-let l2 = ["b"; "c";]
-let l3 = ["d"; "e"; "f"]
-let l4 = ["a"; "b"]
-
-let s1 = MS.init_from_list [l1;l2]
-let s2 = MS.init_from_list [l1;l2;l3]
-let s3 = MS.init_from_list [l1;l4]
 
   
