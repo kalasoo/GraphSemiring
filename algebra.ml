@@ -149,7 +149,7 @@ module MatrixMartelliSemiring (Ele : ELEMENT) = struct
     let _a = ref(a)
     and _m = ref(one n) in
     for i = 0 to n - 1 do
-      printf "\nloop %d" i;
+      printf "loop %d\n" i;
       _m := plus  n !_m !_a;
       _a := times n !_a a
     done;
