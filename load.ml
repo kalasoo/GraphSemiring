@@ -25,18 +25,21 @@ let load_resources file =
 (* Definitions *)
 let () = print_endline "load graph and resources"
 let graph = ref "graphs/basic.gml"
-let resource = ref "graphs/basic_resource"
+let use_resource = ref false
+let rfile = ref "graphs/basic_resource"
 let () =
   Arg.parse
-      ["-f", Arg.Set_string graph,
+      ["-g", Arg.Set_string graph,
        " <String>  path to gml file";
-       "-r", Arg.Set_string resource,
+       "-r", Arg.Set use_resource,
+       " Use resource file";
+       "-f", Arg.Set_string rfile,
        " <String>  path to resource file";
       ]
       (fun _ -> ())
       "usage: ./load <options>"
 let graph = Digraph.parse_gml_file !graph
-let resource = load_resources !resource
+let resource = load_resources !rfile
 
 let () =
   let combine_list s num = 
@@ -60,7 +63,10 @@ let generate_mms graph =
     Digraph.iter_vertex (fun target -> begin
       try 
         let e = Digraph.find_edge graph source target in
-        l := !l @ [ MMS.MS.init_from_list (list_of_list resource.(Digraph.E.label e)) ]
+        if !use_resource then
+          l := !l @ [ MMS.MS.init_from_list (list_of_list resource.(Digraph.E.label e)) ]
+        else
+          l := !l @ [ MMS.MS.init_from_list [[Digraph.E.label e]] ]
       with Not_found ->
         l := !l @ [ zo ]
     end) graph;
