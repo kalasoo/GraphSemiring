@@ -38,14 +38,16 @@ let () =
       ]
       (fun _ -> ())
       "usage: ./load <options>"
+
 let graph = Digraph.parse_gml_file !graph
 let resource = load_resources !rfile
 
 let () =
-  let combine_list s num = 
-    s ^ " " ^ string_of_int(num)
-  in
-  Array.iteri (fun i l -> print_endline (string_of_int(i) ^ ": " ^ (List.fold_left combine_list "" l)) ) resource
+  if !use_resource then
+    let combine_list s num = 
+      s ^ " " ^ string_of_int(num)
+    in
+    Array.iteri (fun i l -> print_endline (string_of_int(i) ^ ": " ^ (List.fold_left combine_list "" l)) ) resource
 
 let n = Digraph.nb_vertex graph
 let m = Digraph.nb_edges graph
