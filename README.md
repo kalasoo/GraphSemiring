@@ -75,5 +75,5 @@ Resource file:
 ```
 
 Corresponding graph:
-![test_graph](graphs/test.gml)
+![test_graph](graphs/test_graph.jpg)
 
