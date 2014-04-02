@@ -32,7 +32,9 @@ usage: ./load <options>
   --help  Display this list of options
 ```
 
-#### Sample .gml file and resource file
+### Example
+
+#### .gml file and resource file
 
 .gml graph file:
 ```
@@ -69,11 +71,87 @@ graph [
 
 Resource file:
 ```
-2 3
-1
-3
+2 3     # resources for edge 0
+1       # resources for edge 1
+3       # resources for edge 2
 ```
 
 Corresponding graph:
 ![test_graph](graphs/test_graph.jpg)
+
+#### Command
+```
+$ ./load -g graphs/test.gml -r -f graphs/test_resource 
+load graph and resources
+0:  2 3
+1:  1
+2:  3
+
+generate mms
+cutset
+loop 0
+loop 1
+loop 2
+
+row 0, col 0
+{
+}
+
+row 0, col 1
+{
+  { 2 }
+  { 3 }
+}
+
+row 0, col 2
+{
+  { 2 1 }
+  { 3 1 }
+}
+
+row 1, col 0
+{
+  { }
+}
+
+row 1, col 1
+{
+}
+
+row 1, col 2
+{
+  { 3 }
+}
+
+row 2, col 0
+{
+  { }
+}
+
+row 2, col 1
+{
+  { }
+}
+
+row 2, col 2
+{
+}
+```
+
+#### What does output mean?
+
+1. `load graph and resources`: read and interpret .gml and resource files.
+2. `generate mms`: generates Generalized Matrix Martelli Semiring.
+3. `cutset`: enumerates all minimal cutsets.
+
+```
+row 0, col 2
+{
+  { 2 1 }
+  { 3 1 }
+}
+
+==> for source vertex 0 to destination vertex 2, there are two minimal cutsets.
+==> 1. {resource 1, resource 2} 2. {resource 1, resource 3}
+```
 
