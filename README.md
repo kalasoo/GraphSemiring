@@ -16,7 +16,7 @@ An MPhil Disseration Program - Cambridge University / Computer Lab
 
 1. `algebra.ml` defines the Generalized Martelli Semiring.
 2. `digraph.ml` defines the Graph object.
-3. `load.ml` is used to load gml files and resources files.
+3. `load.ml` loads .gml and resources files.
 4. `graphs/` folder contains sample .gml files and resource files.
 
 #### Command
