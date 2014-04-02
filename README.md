@@ -74,3 +74,6 @@ Resource file:
 3
 ```
 
+Corresponding graph:
+![test_graph](graphs/test.gml)
+
