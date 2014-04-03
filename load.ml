@@ -2,6 +2,7 @@ open Printf
 open Graph
 open Algebra
 open Digraph
+open Graphmlprint
 
 module Digraph = Generic(Imperative.Digraph.AbstractLabeled(I)(I))
 
@@ -79,3 +80,25 @@ let () =
   let mms = generate_mms graph in
   print_endline "cutset";
   MMS.print_matrix n (MMS.cutset n mms)
+
+(* Graphml *)
+module Gr = struct
+  include Digraph
+  let graphml_vertex_properties = 
+    ["id1","string",None;
+     "id2","string",Some "2"]
+  let graphml_edge_properties = 
+    ["ed", "string",Some "3"]
+  let graphml_map_edge e = ["ed", string_of_int(V.label(E.dst e))]
+  let graphml_map_vertex v = ["id1",string_of_int(V.label(v)) ; "id2",string_of_int(V.label(v))]
+  let graphml_vertex_uid = Digraph.V.hash
+  let graphml_edge_uid e =
+    Hashtbl.hash (graphml_vertex_uid (Digraph.E.src e), Digraph.E.label e,graphml_vertex_uid (Digraph.E.dst e))
+end
+
+module GraphPrinter = GraphmlPrinter(Gr);;
+let graphml_print graph = GraphPrinter.fprintf stdout graph;;
+
+let() =
+  graphml_print graph
+
