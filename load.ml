@@ -2,7 +2,6 @@ open Printf
 open Graph
 open Algebra
 open Digraph
-open Graphmlprint
 
 module Digraph = Generic(Imperative.Digraph.AbstractLabeled(I)(I))
 
@@ -24,10 +23,11 @@ let load_resources file =
     Array.of_list !l
 
 (* Definitions *)
-let () = print_endline "load graph and resources"
+let () = print_endline "load graph and resources:"
 let graph = ref "graphs/basic.gml"
 let use_resource = ref false
 let rfile = ref "graphs/basic_resource"
+let output_graphml = ref "graphs/output.xml"
 let () =
   Arg.parse
       ["-g", Arg.Set_string graph,
@@ -36,6 +36,8 @@ let () =
        " Use resource file";
        "-f", Arg.Set_string rfile,
        " <String>  path to resource file";
+       "-o", Arg.Set_string output_graphml,
+       " <String>  path to output graphml file";
       ]
       (fun _ -> ())
       "usage: ./load <options>"
@@ -55,7 +57,7 @@ let m = Digraph.nb_edges graph
 module MMS = MatrixMartelliSemiring(Int)
 
 (* Semiring *)
-let () = print_endline "\ngenerate mms"
+let () = print_endline "\ngenerate mms:\n"
 let generate_mms graph =
   let zo = MMS.MS.zero 
   and l = ref [] 
@@ -82,23 +84,16 @@ let () =
   MMS.print_matrix n (MMS.cutset n mms)
 
 (* Graphml *)
-module Gr = struct
-  include Digraph
-  let graphml_vertex_properties = 
-    ["id1","string",None;
-     "id2","string",Some "2"]
-  let graphml_edge_properties = 
-    ["ed", "string",Some "3"]
-  let graphml_map_edge e = ["ed", string_of_int(V.label(E.dst e))]
-  let graphml_map_vertex v = ["id1",string_of_int(V.label(v)) ; "id2",string_of_int(V.label(v))]
-  let graphml_vertex_uid = Digraph.V.hash
-  let graphml_edge_uid e =
-    Hashtbl.hash (graphml_vertex_uid (Digraph.E.src e), Digraph.E.label e,graphml_vertex_uid (Digraph.E.dst e))
-end
-
-module GraphPrinter = GraphmlPrinter(Gr);;
-let graphml_print graph = GraphPrinter.fprintf stdout graph;;
+module GraphmlPrinter = Graphml.Print(Digraph)(struct
+  let vertex_properties = ["id1","string",None;"id2","string",Some "2"]
+  let edge_properties = ["ed", "string",Some "3"]
+  let map_vertex v = ["id1",string_of_int(Digraph.V.label(v)) ; "id2",string_of_int(Digraph.V.label(v))]
+  let map_edge e = ["ed", string_of_int(Digraph.V.label(Digraph.E.dst e))]
+  let vertex_uid = Digraph.V.hash
+  let edge_uid e = Hashtbl.hash (vertex_uid (Digraph.E.src e), Digraph.E.label e, vertex_uid (Digraph.E.dst e))
+end);;
 
 let() =
-  graphml_print graph
+  print_endline "\noutput graphml:\n";
+  GraphmlPrinter.print Format.std_formatter graph
 
