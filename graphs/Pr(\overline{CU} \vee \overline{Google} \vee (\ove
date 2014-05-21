@@ -1,1 +1,0 @@
-Pr(\overline{CU} \vee \overline{Google} \vee (\overline{UK} \wedge \overline{Cambridge})) = 1 - p_{r_1} \cdot p_{r_2} + p_{r_1} \cdot p_{r_2} \cdot p_{\overline{r}_3} \cdot p_{\overline{r}_4}
