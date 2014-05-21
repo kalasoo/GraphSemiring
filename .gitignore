@@ -12,5 +12,8 @@ _build/
 *.byte
 *.native
 
-Semiring/
 graph/
+
+Semiring/.*
+
+Semiring/_build/
