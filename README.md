@@ -12,14 +12,18 @@ Dependencies:
 #### Files
 
 1. `graphloader.ml` loads `.gml` file to a graph.
-2. `semirings/` defines the semiring interface and some sample semirings.
+2. Semirings
+  2.1. `semiring.ml` defines the interface of a semiring and a functor to generate a matrix semiring.
+  2.2. `minplus.ml` defines MinPlus Semiring.
+  2.3. `martelli.ml` defines Martelli Semiring.
+  2.4. `boolean.ml` defines Boolean Semiring.
 3. `graphs/` folder contains sample .gml files.
 
 #### Compilation
 
 ```shell
 
-corebuild -pkg ocamlgraph graphloader.byte
+corebuild -pkg ocamlgraph load.byte
 
 ```
 
