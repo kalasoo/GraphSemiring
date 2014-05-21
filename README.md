@@ -1,23 +1,23 @@
-gms
-===
+GraphToSemiring
+===============
 
-Generalized Martelli Semiring
+Dependencies:
 
-An MPhil Disseration Program - Cambridge University / Computer Lab
+1. [ocamlgraph](https://github.com/backtracking/ocamlgraph)
+2. [Semiring](https://github.com/kalasoo/Semiring)
+
 
 ### How to use the code?
 
 #### Compile
 
-`./compile.sh`
-
+To be added later.
 
 #### Files
 
-1. `algebra.ml` defines the Generalized Martelli Semiring.
-2. `digraph.ml` defines the Graph object.
-3. `load.ml` loads .gml and resources files.
-4. `graphs/` folder contains sample .gml files and resource files.
+1. `digraph.ml` defines the Graph object.
+2. `semirings/` defines the semiring interface and some sample semirings.
+4. `graphs/` folder contains sample .gml files.
 
 #### Command
 
