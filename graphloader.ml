@@ -2,11 +2,11 @@ open Core.Std
 open Graph
 
 module Vertex = struct
-  type t = string
+  type t = int
   let compare = compare
   let hash = Hashtbl.hash
   let equal = (=)
-  let default = ""
+  let default = 0
 end
 
 module Edge = struct
@@ -23,13 +23,10 @@ module NodeEdgeParser = struct
   
   let node l =
     try 
-      match List.Assoc.find_exn l "label" with 
-      | Gml.String name -> name
-      | _               ->
-        match List.Assoc.find_exn l "id" with
-        | Gml.Int n -> string_of_int n
-        | _         -> "<node>"
-    with Not_found -> "<node>"
+      match List.Assoc.find_exn l "id" with
+      | Gml.Int n -> n
+      | _         -> -1
+    with Not_found -> -1
 
   let edge l =
     try
@@ -45,7 +42,7 @@ end
 
 module NodeEdgePrinter = struct
 
-  let node (v : G.V.label) = ["label", Gml.String v]
+  let node (v : G.V.label) = ["id", Gml.Int v]
 
   let edge (e : G.E.label) = ["label", Gml.String e]
 

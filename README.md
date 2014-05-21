@@ -11,19 +11,20 @@ Dependencies:
 
 #### Files
 
-1. `graphloader.ml` loads `.gml` file to a graph.
-2. Semirings
+1. Semirings
   * `semiring.ml` defines the interface of a semiring and a matrix semiring.
   * `minplus.ml` defines MinPlus Semiring.
   * `martelli.ml` defines Martelli Semiring.
   * `boolean.ml` defines Boolean Semiring.
+2. `graphloader.ml` loads `.gml` file to a graph.
+3. `semiringloader.ml` loads converts a graph to a matrix semiring.
 3. `graphs/` folder contains sample .gml files.
 
 #### Compilation
 
 ```shell
 
-corebuild -pkg ocamlgraph load.byte
+corebuild -pkg ocamlgraph -pkg str load.byte
 
 ```
 
@@ -31,11 +32,9 @@ corebuild -pkg ocamlgraph load.byte
 
 ```shell
 $ ./load --help
-load graph and resources
+
 usage: ./load <options>
   -g  <String>  path to gml file
-  -r  Use resource file
-  -f  <String>  path to resource file
   -help  Display this list of options
   --help  Display this list of options
 ```
