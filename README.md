@@ -9,19 +9,23 @@ Dependencies:
 
 ### How to use the code?
 
-#### Compile
-
-To be added later.
-
 #### Files
 
-1. `digraph.ml` defines the Graph object.
+1. `graphloader.ml` loads `.gml` file to a graph.
 2. `semirings/` defines the semiring interface and some sample semirings.
-4. `graphs/` folder contains sample .gml files.
+3. `graphs/` folder contains sample .gml files.
+
+#### Compilation
+
+```shell
+
+corebuild -pkg ocamlgraph graphloader.byte
+
+```
 
 #### Command
 
-```
+```shell
 $ ./load --help
 load graph and resources
 usage: ./load <options>
