@@ -7,13 +7,22 @@
 *.cmx
 *.cmxs
 *.cmxa
-
-_build/
 *.byte
 *.native
 
+_build/
+
 graph/
 
-Semiring/.*
-
+Semiring/*.annot
+Semiring/*.cmo
+Semiring/*.cma
+Semiring/*.cmi
+Semiring/*.a
+Semiring/*.o
+Semiring/*.cmx
+Semiring/*.cmxs
+Semiring/*.cmxa
+Semiring/*.byte
+Semiring/*.native
 Semiring/_build/
