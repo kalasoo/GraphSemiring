@@ -1,17 +1,16 @@
-*.cmi
-
+*.annot
 *.cmo
-
-*.cmx
-
+*.cma
+*.cmi
+*.a
 *.o
+*.cmx
+*.cmxs
+*.cmxa
 
-algebra
-
-load
-
-digraph
-
-graph/t
+_build/
+*.byte
+*.native
 
 Semiring/
+graph/
