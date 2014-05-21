@@ -1,4 +1,3 @@
-
 *.cmi
 
 *.cmo
@@ -14,3 +13,5 @@ load
 digraph
 
 graph/t
+
+Semiring/
