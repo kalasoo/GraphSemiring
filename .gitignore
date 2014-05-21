@@ -14,15 +14,15 @@ _build/
 
 graph/
 
-Semiring/*.annot
-Semiring/*.cmo
-Semiring/*.cma
-Semiring/*.cmi
-Semiring/*.a
-Semiring/*.o
-Semiring/*.cmx
-Semiring/*.cmxs
-Semiring/*.cmxa
-Semiring/*.byte
-Semiring/*.native
-Semiring/_build/
+semirings/*.annot
+semirings/*.cmo
+semirings/*.cma
+semirings/*.cmi
+semirings/*.a
+semirings/*.o
+semirings/*.cmx
+semirings/*.cmxs
+semirings/*.cmxa
+semirings/*.byte
+semirings/*.native
+semirings/_build/
