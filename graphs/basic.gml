@@ -18,26 +18,21 @@ graph [
   edge [
     source 0
     target 1
-    label 0
+    label "((r1))"
   ]
   edge [
     source 0
     target 2
-    label 1
-  ]
-  edge [
-    source 1
-    target 2
-    label 2
+    label "((r2 r3))"
   ]
   edge [
     source 1
     target 3
-    label 3
+    label "((r2) (r3))"
   ]
   edge [
     source 2
     target 3
-    label 4
+    label "((r1 r2) (r3 r4))"
   ]
 ]
