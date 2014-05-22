@@ -177,20 +177,20 @@ module MS = struct
 
   include Set.Make(S)
 
-  let zero = add empty S.empty
+  let zero = empty
 
-  let one = empty
+  let one = add empty S.empty
 
   let reduce a = 
     let not_subset set = for_all a ~f:(fun a_set -> not (S.subset a_set set) || S.equal a_set set) in
     filter a ~f:not_subset
 
   let plus a b =
-    let fold_element s a_set = fold b ~init:s ~f:(fun s_iter b_set -> add s_iter (S.union a_set b_set)) in
-    reduce (fold a ~init:empty ~f:fold_element )
+    reduce (union a b)
 
   let times a b =
-    reduce (union a b)
+    let fold_element s a_set = fold b ~init:s ~f:(fun s_iter b_set -> add s_iter (S.union a_set b_set)) in
+    reduce (fold a ~init:empty ~f:fold_element )
 
   let create s =
     reduce (t_of_sexp (Sexp.of_string s))
