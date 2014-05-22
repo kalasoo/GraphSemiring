@@ -105,12 +105,26 @@ module Make_Matrix_Semiring (Semiring : S) = struct
 
   let print a =
     let n = size a in
-    for i = 0 to n - 1 do
-      for j = 0 to n - 1 do
-        printf "\t%s;" (Semiring.to_string a.(i).(j))
-      done;
-      print_char '\n'
-    done;
+    let a_str_matrix = Array.map ~f:(fun row ->
+      Array.map ~f:(fun ele -> Semiring.to_string ele) row
+    ) a
+    in
+    let max_widths rows =
+      let lengths row = Array.map ~f:String.length row in
+      Array.fold rows
+        ~init: (Array.create ~len:n 0)
+        ~f: (fun acc row -> Array.map2_exn ~f:Int.max acc (lengths row))
+    in
+    let pad s length =
+      " " ^ s ^ String.make (length - String.length s + 1) ' '
+    in
+    let render_row row widths =
+      let padded = Array.map2_exn ~f:pad row widths in
+      "|" ^ String.concat ~sep:";" (Array.to_list padded) ^ "|\n"
+    in
+    let widths = max_widths a_str_matrix in
+    Array.iter a_str_matrix ~f:(fun row ->
+      printf "%s" (render_row row widths))
 
 end
 
