@@ -33,8 +33,8 @@ corebuild -pkg ocamlgraph -pkg str load.byte
 ```shell
 $ ./load.byte --help
 
-usage: ./load <options>
-  -g  <String>  path to gml file
+usage: ./load.byte <options>
+  -g  <String> path to gml file
   -help  Display this list of options
   --help  Display this list of options
 ```
@@ -44,7 +44,7 @@ usage: ./load <options>
 #### .gml file and resource file
 
 .gml graph file:
-```
+```gml
 graph [
   node [
     id 0
@@ -86,81 +86,36 @@ graph [
 ```
 
 Corresponding graph:
-![test_graph](graphs/test_graph.jpg)
+![basic_graph](graphs/basic.png)
 
 #### Command
 ```
-$ ./load -g graphs/test.gml -r -f graphs/test_resource 
-load graph and resources
-0:  2 3
-1:  1
-2:  3
+$ ./load.byte
 
-generate mms
-cutset
-loop 0
-loop 1
-loop 2
+>>> Load graph
+nodes:
+  0
+  1
+  2
+  3
+edges:
+  [0 1]: ((r1))
+  [0 2]: ((r2 r3))
+  [1 3]: ((r2) (r3))
+  [2 3]: ((r1 r2) (r3 r4))
 
-row 0, col 0
-{
-}
+>>> Make Martelli Semiring
 
-row 0, col 1
-{
-  { 2 }
-  { 3 }
-}
-
-row 0, col 2
-{
-  { 2 1 }
-  { 3 1 }
-}
-
-row 1, col 0
-{
-  { }
-}
-
-row 1, col 1
-{
-}
-
-row 1, col 2
-{
-  { 3 }
-}
-
-row 2, col 0
-{
-  { }
-}
-
-row 2, col 1
-{
-  { }
-}
-
-row 2, col 2
-{
-}
+>>> Solve Semiring
+| ()   ; ((r1)) ; ((r2 r3)) ; ((r1 r2)(r2 r3)(r3 r4)) |
+| (()) ; ()     ; (())      ; ((r2)(r3))              |
+| (()) ; (())   ; ()        ; ((r1 r2)(r3 r4))        |
+| (()) ; (())   ; (())      ; ()                      |
 ```
 
 #### What does output mean?
 
-1. `load graph and resources`: read and interpret .gml and resource files.
-2. `generate mms`: generates Generalized Matrix Martelli Semiring.
-3. `cutset`: enumerates all minimal cutsets.
-
-```
-row 0, col 2
-{
-  { 2 1 }
-  { 3 1 }
-}
-
-==> for source vertex 0 to destination vertex 2, there are two minimal cutsets.
-==> 1. {resource 1, resource 2} 2. {resource 1, resource 3}
-```
+1. `Load graph`: read and interpret a .gml files (resources are assigned on labels of edges).
+2. `Make Martelli Semiring`: generate a martelli semiring.
+3. `Solve Semiring`: the graph is solved with the martelli semiring.
 
