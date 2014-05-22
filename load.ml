@@ -31,5 +31,4 @@ let () =
 
 
 let () = print_section "Make Martelli Semiring"
-
 let m = create_martelli_semiring g

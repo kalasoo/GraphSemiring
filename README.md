@@ -31,7 +31,7 @@ corebuild -pkg ocamlgraph -pkg str load.byte
 #### Command
 
 ```shell
-$ ./load --help
+$ ./load.byte --help
 
 usage: ./load <options>
   -g  <String>  path to gml file
