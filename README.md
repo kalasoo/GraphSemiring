@@ -13,8 +13,8 @@ Dependencies:
 
 1. `semiring.ml` defines the interface of a semiring and a matrix semiring and provides several sample semirings.
   * `MPS`: MinPlus Semiring.
-  * `MS`: defines Martelli Semiring.
-  * `BS`: defines Boolean Semiring.
+  * `MS`: Martelli Semiring.
+  * `BS`: Boolean Semiring.
 2. `graphloader.ml` loads `.gml` file to a graph.
 3. `graphs/` folder contains sample .gml files.
 
