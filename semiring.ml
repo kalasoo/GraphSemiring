@@ -1,7 +1,7 @@
 open Core.Std
 
 (** Semiring *)
-module type S = sig
+module type SEMIRING = sig
   
   (** The type of a semiring. *)
   type t
@@ -24,7 +24,7 @@ end
 
 (** Functor building an implementation of the Martrix Semiring
    given a Semiring. *)
-module Make_Matrix_Semiring (Semiring : S) = struct
+module Make_Matrix_Semiring (Semiring : SEMIRING) = struct
 
   type t = Semiring.t array array
 
@@ -222,8 +222,7 @@ module BS = struct
       with Not_found -> false
 
   let string_of_product product = 
-    let l = B.values product in
-    String.of_char_list (List.map l ~f:Char.of_string)
+    String.concat (B.values product)
 
   let compare_product a b =
     let a_str = string_of_product a  in

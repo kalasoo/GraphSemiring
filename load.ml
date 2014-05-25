@@ -30,8 +30,9 @@ let () =
     printf "\t[%d %d]: %s\n%!" (G.V.label s) (G.V.label t) (G.E.label e)
   ) g
 
-(* Make Martelli Semiring *)
-let () = print_section "Make Martelli Semiring"
+(* Make Semiring *)
+(* let () = print_section "Make Martelli Semiring" *)
+let () = print_section "Make Boolean Semiring"
 let semiring_of_graph g zero create =
   let n = G.nb_vertex g in
   let m = zero n    in
@@ -42,10 +43,11 @@ let semiring_of_graph g zero create =
     m.(s).(t) <- (create r)
   ) g;
   m
-let m = semiring_of_graph g MMS.zero MS.create
+(* let m = semiring_of_graph g MMS.zero MS.create *)
+let m = semiring_of_graph g MBS.zero BS.create
   
 (* Make Martelli Semiring *)
 let () = print_section "Solve Semiring"
 let () =
-  let solved = MMS.solve m in
-  MMS.print solved
+  let solved = MBS.solve m in
+  MBS.print solved
