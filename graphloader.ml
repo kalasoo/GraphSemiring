@@ -11,15 +11,15 @@ type server_info = {
   id         : int;
   label      : string;
   country    : string;
-  longtitude : float;
+  longitude : float;
   latitude   : float;
 }
 
-let make_server_info ~id ~label ~country ~longtitude ~latitude = {
+let make_server_info ~id ~label ~country ~longitude ~latitude = {
   id;
   label;
   country;
-  longtitude;
+  longitude;
   latitude;
 }
 
@@ -33,7 +33,7 @@ module NodeEdgeParser = struct
   
   let node l =
     let default_server_info () =
-      make_server_info ~id:~-1 ~label:"<label>" ~country:"<country>" ~longtitude:0.0 ~latitude:0.0
+      make_server_info ~id:~-1 ~label:"<label>" ~country:"<country>" ~longitude:0.0 ~latitude:0.0
     in
     try 
       let id =
@@ -47,27 +47,27 @@ module NodeEdgeParser = struct
         | _ -> "<label>"
       in
       let country =
-        match List.Assoc.find_exn l "country" with
+        match List.Assoc.find_exn l "Country" with
         | Gml.String s -> s
         | _ -> "<country>"
       in
-      let longtitude =
-        match List.Assoc.find_exn l "longtitude" with
+      let longitude =
+        match List.Assoc.find_exn l "Longitude" with
         | Gml.Float f -> f
         | _ -> 0.0
       in
       let latitude =
-        match List.Assoc.find_exn l "latitude" with
+        match List.Assoc.find_exn l "Latitude" with
         | Gml.Float f -> f
         | _ -> 0.0
       in
-      make_server_info ~id ~label ~country ~longtitude ~latitude
+      make_server_info ~id ~label ~country ~longitude ~latitude
     with Not_found -> default_server_info ()
 
   let edge l =
     let default_edge_resource l =
       match List.Assoc.find_exn l "source", List.Assoc.find_exn l "target" with
-      | Gml.String source, Gml.String target -> "((" ^ source ^ " " ^ target ^ "))"
+      | Gml.Int source, Gml.Int target -> "((" ^ (Int.to_string source) ^ " " ^ (Int.to_string target) ^ "))"
       | _ -> "(())"
     in
     try
@@ -84,7 +84,7 @@ module NodeEdgePrinter = struct
     "id"        , Gml.Int    v.id;
     "label"     , Gml.String v.label;
     "country"   , Gml.String v.country;
-    "longtitude", Gml.Float  v.longtitude;
+    "longitude" , Gml.Float  v.longitude;
     "latitude"  , Gml.Float  v.latitude;
   ]
 
