@@ -21,13 +21,13 @@ let () = print_section "Load graph"
 let () =
   print_endline "nodes:";
   G.iter_vertex (fun v -> 
-    printf "\t%d\n%!" (G.V.label v)
+    printf "\t%d\n%!" (G.V.label v).id
   ) g;
   print_endline "edges:";
   G.iter_edges_e (fun e ->
     let s = G.E.src e in
     let t = G.E.dst e in
-    printf "\t[%d %d]: %s\n%!" (G.V.label s) (G.V.label t) (G.E.label e)
+    printf "\t[%d %d]: %s\n%!" (G.V.label s).id (G.V.label t).id (G.E.label e)
   ) g
 
 (* Make Semiring *)
@@ -37,9 +37,9 @@ let semiring_of_graph g zero create =
   let n = G.nb_vertex g in
   let m = zero n    in
   G.iter_edges_e (fun e -> 
-    let s = G.V.label (G.E.src e) in
-    let t = G.V.label (G.E.dst e) in
-    let r = G.E.label e           in
+    let s = (G.V.label (G.E.src e)).id in
+    let t = (G.V.label (G.E.dst e)).id in
+    let r = G.E.label e                in
     m.(s).(t) <- (create r)
   ) g;
   m
