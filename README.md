@@ -22,7 +22,7 @@ Dependencies:
 
 ```shell
 
-corebuild -pkg ocamlgraph -pkg str load.byte
+corebuild -pkg ocamlgraph -pkg str -pkg graphics load.byte
 
 ```
 
