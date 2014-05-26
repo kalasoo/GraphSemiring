@@ -5,7 +5,7 @@ open Semiring
 let print_section s = print_endline ("\n>>> " ^ s)
 
 (* Args *)
-let input_gml_file = ref "graphs/basic.gml"
+let input_gml_file = ref "graphs/AttMpls.gml"
 let () =
   Arg.parse
       ["-g", Arg.Set_string input_gml_file,
@@ -48,12 +48,25 @@ let m = semiring_of_graph g MMS.zero MS.create
 (* let m = semiring_of_graph g MBS.zero BS.create *)
   
 (* Make Martelli Semiring *)
-let () = print_section "Solve Semiring"
+(* let () = print_section "Solve Semiring"
 let () =
   let solved = MMS.solve m in
-  MMS.print solved
+  MMS.print solved *)
 
 (* Draw Graph *)
 let () =
-  Visualize.create_graph g;
-  Visualize.draw_graph g;
+  try
+    Visualize.create_graph g;
+    Visualize.draw_graph g;
+    while true do
+      let st = Graphics.wait_next_event [ Key_pressed ] in
+      if st.keypressed then match st.key with
+      | 'q' -> raise Exit
+      | _   -> ()
+      else ()
+    done
+  with
+  | Exit -> (
+    print_section "end";
+    Visualize.end_graph ()
+  )

@@ -2,33 +2,33 @@ open Core.Std
 open Graphloader
 open Graphics
 
-let min_x  = ref 0.
-let max_x  = ref 0.
-let min_y  = ref 0.
-let max_y  = ref 0.
+let min_x  = ref 180.
+let max_x  = ref (-.180.)
+let min_y  = ref 90.
+let max_y  = ref (-.90.)
 
 let round f = Float.to_int (Float.round_up f)
 let pi = 4.0 *. atan 1.0
+let vertex_radius = 5
 
 let create_graph g =
-  (* open_graph " 800x600"; *)
+  open_graph " 800x600";
   G.iter_vertex (fun v -> 
     let v_info = G.V.label v      in
     let x      = v_info.longitude in
     let y      = v_info.latitude  in
-    if x < !min_x
-    then min_x := x
+    if x < !min_x then min_x := x
     else
-      if x > !max_x
-      then max_x := x
+      if x > !max_x then max_x := x
       else ();
-    if y < !min_y
-    then min_y := y
+    if y < !min_y then min_y := y
     else
-      if y > !max_y
-      then max_y := y
+      if y > !max_y then max_y := y
       else ()
-  ) g
+  ) g;
+  printf "[%f, %f] [%f, %f]%!" !min_x !max_x !min_y !max_y
+
+let end_graph () = close_graph ()
 
 let to_position v =
   let v_info = G.V.label v      in
@@ -37,7 +37,6 @@ let to_position v =
   round (20. +. 760. *. (x -. !min_x) /. (!max_x -. !min_x)),
   round (20. +. 560. *. (y -. !min_y) /. (!max_y -. !min_y))
 
-let vertex_radius = 5
 let draw_arrow ?(color=black) ?(width=1) (xu,yu) (xv,yv) =
   set_color color;
   set_line_width width;
@@ -69,12 +68,9 @@ let draw_graph g =
   clear_graph ();
   set_color red;
   set_line_width 1;
-  G.iter_vertex
-    (fun v ->
-       let (x,y) = to_position v in
-       draw_circle x y vertex_radius)
-    g;
+  G.iter_vertex (fun v ->
+   let (x,y) = to_position v in
+   draw_circle x y vertex_radius) g;
   set_color black;
-  G.iter_edges
-    (fun v1 v2 -> draw_arrow (to_position v1) (to_position v2))
-    g;
+  G.iter_edges (fun v1 v2 -> 
+    draw_arrow (to_position v1) (to_position v2)) g

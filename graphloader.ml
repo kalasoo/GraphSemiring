@@ -8,11 +8,11 @@ module Edge = struct
 end
 
 type server_info = {
-  id         : int;
-  label      : string;
-  country    : string;
+  id        : int;
+  label     : string;
+  country   : string;
   longitude : float;
-  latitude   : float;
+  latitude  : float;
 }
 
 let make_server_info ~id ~label ~country ~longitude ~latitude = {
