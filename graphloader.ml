@@ -1,12 +1,7 @@
 open Core.Std
 open Graph
 
-module Edge = struct
-  type t = string
-  let compare = compare
-  let default = ""
-end
-
+(* Vertex *)
 type server_info = {
   id        : int;
   label     : string;
@@ -23,6 +18,58 @@ let make_server_info ~id ~label ~country ~longitude ~latitude = {
   latitude;
 }
 
+let assign_server_info l =
+  let default_server_info () =
+    make_server_info ~id:~-1 ~label:"<label>" ~country:"<country>" ~longitude:0.0 ~latitude:0.0
+  in
+  try 
+    let id =
+      match List.Assoc.find_exn l "id" with
+      | Gml.Int n -> n
+      | _         -> -1
+    in
+    let label =
+      match List.Assoc.find_exn l "label" with
+      | Gml.String s -> s
+      | _ -> "<label>"
+    in
+    let country =
+      match List.Assoc.find_exn l "Country" with
+      | Gml.String s -> s
+      | _ -> "<country>"
+    in
+    let longitude =
+      match List.Assoc.find_exn l "Longitude" with
+      | Gml.Float f -> f
+      | _ -> 0.0
+    in
+    let latitude =
+      match List.Assoc.find_exn l "Latitude" with
+      | Gml.Float f -> f
+      | _ -> 0.0
+    in
+    make_server_info ~id ~label ~country ~longitude ~latitude
+  with Not_found -> default_server_info ()
+
+(* Edge *)
+module Edge = struct
+  type t = string
+  let compare = compare
+  let default = ""
+end
+
+let default_martelli_resource l =
+  match List.Assoc.find_exn l "source", List.Assoc.find_exn l "target" with
+  | Gml.Int source, Gml.Int target -> "((" ^ (Int.to_string source) ^ " " ^ (Int.to_string target) ^ "))"
+  | _ -> "(())"
+
+let label_edge_resource l =
+  try
+    match List.Assoc.find_exn l "label" with
+    | Gml.String resource -> resource
+    | _                   -> default_martelli_resource l
+  with Not_found -> default_martelli_resource l
+
 module G = Imperative.Digraph.AbstractLabeled(struct
   type t = server_info
 end)(Edge)
@@ -30,51 +77,10 @@ end)(Edge)
 module B = Builder.I(G)
 
 module NodeEdgeParser = struct
-  
-  let node l =
-    let default_server_info () =
-      make_server_info ~id:~-1 ~label:"<label>" ~country:"<country>" ~longitude:0.0 ~latitude:0.0
-    in
-    try 
-      let id =
-        match List.Assoc.find_exn l "id" with
-        | Gml.Int n -> n
-        | _         -> -1
-      in
-      let label =
-        match List.Assoc.find_exn l "label" with
-        | Gml.String s -> s
-        | _ -> "<label>"
-      in
-      let country =
-        match List.Assoc.find_exn l "Country" with
-        | Gml.String s -> s
-        | _ -> "<country>"
-      in
-      let longitude =
-        match List.Assoc.find_exn l "Longitude" with
-        | Gml.Float f -> f
-        | _ -> 0.0
-      in
-      let latitude =
-        match List.Assoc.find_exn l "Latitude" with
-        | Gml.Float f -> f
-        | _ -> 0.0
-      in
-      make_server_info ~id ~label ~country ~longitude ~latitude
-    with Not_found -> default_server_info ()
 
-  let edge l =
-    let default_edge_resource l =
-      match List.Assoc.find_exn l "source", List.Assoc.find_exn l "target" with
-      | Gml.Int source, Gml.Int target -> "((" ^ (Int.to_string source) ^ " " ^ (Int.to_string target) ^ "))"
-      | _ -> "(())"
-    in
-    try
-      match List.Assoc.find_exn l "label" with
-      | Gml.String resource -> resource
-      | _                   -> default_edge_resource l
-    with Not_found -> default_edge_resource l
+  let node l = assign_server_info l
+
+  let edge l = label_edge_resource l
 
 end
 

@@ -105,6 +105,7 @@ module Make_Matrix_Semiring (Semiring : SEMIRING) = struct
 
   let print a =
     let n = size a in
+    let header = Array.init n ~f:(fun i -> Int.to_string i) in
     let a_str_matrix = Array.map ~f:(fun row ->
       Array.map ~f:(fun ele -> Semiring.to_string ele) row
     ) a
@@ -122,9 +123,14 @@ module Make_Matrix_Semiring (Semiring : SEMIRING) = struct
       let padded = Array.map2_exn ~f:pad row widths in
       "|" ^ String.concat ~sep:";" (Array.to_list padded) ^ "|\n"
     in
+    let render_header header widths =
+      let padded = Array.map2_exn ~f:pad header widths in
+      "  " ^ String.concat ~sep:" " (Array.to_list padded) ^ " \n"
+    in
     let widths = max_widths a_str_matrix in
-    Array.iter a_str_matrix ~f:(fun row ->
-      printf "%s" (render_row row widths))
+    printf "\t%s" (render_header header widths);
+    Array.iteri a_str_matrix ~f:(fun i row ->
+      printf "%d\t%s" i (render_row row widths))
 
 end
 
