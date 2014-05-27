@@ -2,10 +2,10 @@ open Core.Std
 open Graphloader
 open Graphics
 
-let min_x  = ref 180.
-let max_x  = ref (-.180.)
-let min_y  = ref 90.
-let max_y  = ref (-.90.)
+let xmin  = ref 180.
+let xmax  = ref (-.180.)
+let ymin  = ref 90.
+let ymax  = ref (-.90.)
 
 let round f = Float.to_int (Float.round_up f)
 let pi = 4.0 *. atan 1.0
@@ -17,16 +17,11 @@ let create_graph g =
     let v_info = G.V.label v      in
     let x      = v_info.longitude in
     let y      = v_info.latitude  in
-    if x < !min_x then min_x := x
-    else
-      if x > !max_x then max_x := x
-      else ();
-    if y < !min_y then min_y := y
-    else
-      if y > !max_y then max_y := y
-      else ()
-  ) g;
-  printf "[%f, %f] [%f, %f]%!" !min_x !max_x !min_y !max_y
+    if x < !xmin then xmin := x;
+    if x > !xmax then xmax := x;
+    if y < !ymin then ymin := y;
+    if y > !ymax then ymax := y;
+  ) g
 
 let end_graph () = close_graph ()
 
@@ -34,8 +29,9 @@ let to_position v =
   let v_info = G.V.label v      in
   let x      = v_info.longitude in
   let y      = v_info.latitude  in
-  round (20. +. 760. *. (x -. !min_x) /. (!max_x -. !min_x)),
-  round (20. +. 560. *. (y -. !min_y) /. (!max_y -. !min_y))
+  let x'     = round (20. +. 760. *. (x -. !xmin) /. (!xmax -. !xmin)) in
+  let y'     = round (20. +. 560. *. (y -. !ymin) /. (!ymax -. !ymin)) in
+  x', y'
 
 let draw_arrow ?(color=black) ?(width=1) (xu,yu) (xv,yv) =
   set_color color;
@@ -64,6 +60,23 @@ let color_vertex v color =
   set_color color;
   fill_circle x y vertex_radius
 
+type selection =
+  | No
+  | One of G.V.t
+  | Two of G.V.t * G.V.t
+
+let selection = ref No
+
+let draw_selection () = match !selection with
+  | No -> ()
+  | One v1 -> color_vertex v1 blue
+  | Two (v1, v2) -> color_vertex v1 blue; color_vertex v2 green
+
+let distance (x1,y1) (x2,y2) =
+  let dx = float (x1 - x2) in
+  let dy = float (y1 - y2) in
+  round (sqrt (dx *. dx +. dy *. dy))
+
 let draw_graph g =
   clear_graph ();
   set_color red;
@@ -73,4 +86,32 @@ let draw_graph g =
    draw_circle x y vertex_radius) g;
   set_color black;
   G.iter_edges (fun v1 v2 -> 
-    draw_arrow (to_position v1) (to_position v2)) g
+    draw_arrow (to_position v1) (to_position v2)) g;
+  draw_selection ()
+
+exception Clicked of G.vertex
+
+let select g =
+  let select_vertex v = match !selection with
+    | No           -> selection := One v
+    | One v1       -> selection := Two (v1, v)
+    | Two (v1, v2) -> selection := One v
+  in
+  let p = mouse_pos () in
+  let click_vertex v =
+    if distance p (to_position v) <= vertex_radius then
+      begin
+        select_vertex v;
+        draw_graph g;
+        raise (Clicked v)
+      end
+  in
+  try
+    G.iter_vertex click_vertex g;
+    None
+  with
+  | Clicked v ->
+    match !selection with
+    | No           -> None
+    | One v1       -> None
+    | Two (v1, v2) -> Some (v1, v2)
