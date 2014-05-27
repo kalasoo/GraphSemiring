@@ -56,6 +56,24 @@ let () =
 let () = print_section "Solve Semiring"
 let solved = MMS.solve m
 
+let highlight ms =
+  MS.iter ms ~f:(fun rs ->
+    let color = Visualize.random_color() in
+    G.iter_edges_e (fun e -> 
+      let s = G.E.src e in
+      let d = G.E.dst e in
+      let s_info = G.V.label s in
+      let d_info = G.V.label d in
+      let ms' = m.(s_info.id).(d_info.id) in
+      let need_highlight = MS.fold_until ms' ~init:false ~f:(fun acc rs' -> 
+        if MS.S.is_empty (MS.S.inter rs rs')
+        then `Continue false
+        else `Stop true)
+      in
+      if need_highlight then Visualize.draw_highlight s d color
+    ) g
+  )
+
 let () =
   if !is_visualize
   then
@@ -77,6 +95,7 @@ let () =
               let s = G.V.label src in
               let d = G.V.label dst in
               let ms = solved.(s.id).(d.id) in
+              highlight ms;
               printf "[%d %d]: %s\n%!" s.id d.id (MS.to_string ms)
       done
     with

@@ -33,6 +33,9 @@ let to_position v =
   let y'     = round (20. +. 560. *. (y -. !ymin) /. (!ymax -. !ymin)) in
   x', y'
 
+let random_color () =
+  rgb (Random.int 256) (Random.int 256) (Random.int 256)
+
 let draw_arrow ?(color=black) ?(width=1) (xu,yu) (xv,yv) =
   set_color color;
   set_line_width width;
@@ -59,6 +62,9 @@ let color_vertex v color =
   let x,y    = to_position v in
   set_color color;
   fill_circle x y vertex_radius
+
+let draw_highlight s d color =
+  draw_arrow ?color:(Some color) (to_position s) (to_position d)
 
 type selection =
   | No
