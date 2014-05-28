@@ -47,9 +47,9 @@ let semiring_of_graph g zero create =
 let m = semiring_of_graph g MMS.zero MS.create
 let () =
   G.iter_edges_e (fun e ->
-    let s = (G.V.label (G.E.src e)).id in
-    let t = (G.V.label (G.E.dst e)).id in
-    printf "\t[%d %d]: %s\n%!" s t (MS.to_string m.(s).(t))
+    let s = G.V.label (G.E.src e) in
+    let d = G.V.label (G.E.dst e) in
+    printf "\t[%d:%s %d:%s]: %s\n%!" s.id s.label d.id d.label (MS.to_string m.(s.id).(d.id))
   ) g
 
 (* Make Martelli Semiring *)
@@ -105,8 +105,8 @@ let () =
               let ms = solved.(s.id).(d.id) in
               highlight ms;
               if (!random_r > 0)
-              then printf "[%d %d %f]: %s\n%!" s.id d.id (prob ms) (MS.to_string ms)
-              else printf "[%d %d]: %s\n%!" s.id d.id (MS.to_string ms)
+              then printf "[%d:%s %d:%s %f]: %s\n%!" s.id s.label d.id d.label (prob ms) (MS.to_string ms)
+              else printf "[%d:%s %d:%s]: %s\n%!" s.id s.label d.id d.label (MS.to_string ms)
       done
     with
     | Exit -> (

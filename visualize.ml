@@ -12,7 +12,7 @@ let pi = 4.0 *. atan 1.0
 let vertex_radius = 5
 
 let create_graph g =
-  open_graph " 800x600";
+  open_graph " 850x600";
   G.iter_vertex (fun v -> 
     let v_info = G.V.label v      in
     let x      = v_info.longitude in
@@ -36,7 +36,7 @@ let to_position v =
 let random_color () =
   rgb (Random.int 256) (Random.int 256) (Random.int 256)
 
-let draw_arrow ?(color=black) ?(width=2) (xu,yu) (xv,yv) =
+let draw_arrow ?(color=black) ?(width=1) (xu,yu) (xv,yv) =
   set_color color;
   set_line_width width;
   let dx = float (xv - xu) in
@@ -83,16 +83,31 @@ let distance (x1,y1) (x2,y2) =
   let dy = float (y1 - y2) in
   round (sqrt (dx *. dx +. dy *. dy))
 
+let draw_label x y s =
+  let x', y' = x + vertex_radius * 2, y - vertex_radius in
+  let w, h = text_size s in
+  set_color white;
+  fill_rect x' y' w h;
+  moveto x' y';
+  set_color red;
+  draw_string s
+
 let draw_graph g =
   clear_graph ();
-  set_color red;
   set_line_width 1;
-  G.iter_vertex (fun v ->
-   let (x,y) = to_position v in
-   draw_circle x y vertex_radius) g;
+  (* edge *)
   set_color black;
   G.iter_edges (fun v1 v2 -> 
     draw_arrow (to_position v1) (to_position v2)) g;
+  (* vertex *)
+  set_color red;
+  G.iter_vertex (fun v ->
+    let (x,y) = to_position v in
+    let label  = (G.V.label v).label in
+    draw_circle x y vertex_radius;
+    draw_label x y label
+  ) g;
+  (* selection *)
   draw_selection ()
 
 exception Clicked of G.vertex
@@ -101,7 +116,7 @@ let select g =
   let select_vertex v = match !selection with
     | No           -> selection := One v
     | One v1       -> selection := Two (v1, v)
-    | Two (v1, v2) -> selection := One v
+    | Two (_, _)   -> selection := One v
   in
   let p = mouse_pos () in
   let click_vertex v =
@@ -116,8 +131,8 @@ let select g =
     G.iter_vertex click_vertex g;
     None
   with
-  | Clicked v ->
+  | Clicked _ ->
     match !selection with
     | No           -> None
-    | One v1       -> None
+    | One _        -> None
     | Two (v1, v2) -> Some (v1, v2)
