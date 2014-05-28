@@ -5,25 +5,45 @@ open Semiring
 let print_section s = print_endline ("\n>>> " ^ s)
 
 (* Args *)
-let input_gml_file = ref "graphs/basic_martelli.gml"
-let is_visualize   = ref false
-let random_r       = ref (-1)
+let input_gml_file   = ref "graphs/basic_martelli.gml"
+let random_r         = ref (-1)
+let is_visualize     = ref true
+let is_bidirectional = ref false
+let martelli_style   = ref "basic"
 let () =
   Arg.parse
       ["-g", Arg.Set_string input_gml_file,
        " <String> path to gml file";
+       "-r", Arg.Set_int random_r,
+       " <Int> amount of the resources";
        "-v", Arg.Set is_visualize,
        " to visualize the graph";
-       "-r", Arg.Set_int random_r,
-       " <Int> amount of the resources"
+       "-b", Arg.Set is_bidirectional,
+       " to set each edge as bidirectional";
+       "-m", Arg.Set_string martelli_style,
+       " <String> Martelli resources: random | basic | vertex | edge"
       ]
       (fun _ -> ())
       "usage: ./load.byte <options>"
-let g = graph_of_gml !input_gml_file
-let martelli_resources = Resource.random_resources !random_r
 
 (* Load graph *)
 let () = print_section "Load graph"
+let g = graph_of_gml !input_gml_file
+let martelli_resources = Resource.random_resources !random_r
+
+(* Bidirectional *)
+let () =
+  if !is_bidirectional
+  then
+    G.iter_edges_e (fun e -> 
+      let s     = G.E.src e in
+      let d     = G.E.dst e in
+      let label = G.E.label e in
+      let e'    = G.E.create d label s in
+      G.add_edge_e g e'
+    ) g
+
+(* Output *)
 let () =
   printf "%d nodes:\n" (G.nb_vertex g);
   G.iter_vertex (fun v -> 
@@ -35,12 +55,25 @@ let () =
 (* Make Semiring *)
 let () = print_section "Make Martelli Semiring"
 let semiring_of_graph g zero create =
+  let style  = !martelli_style in
+  let random = !random_r       in
   let n = G.nb_vertex g in
   let m = zero n        in
   G.iter_edges_e (fun e -> 
     let s = (G.V.label (G.E.src e)).id in
     let d = (G.V.label (G.E.dst e)).id in
-    let r = if (!random_r > 0) then Resource.random_martelli martelli_resources else G.E.label e in
+    let r = 
+      if style = "random" && random > 0
+      then Resource.random_martelli martelli_resources 
+      else
+        if style = "vertex" then
+          Resource.vertex_martelli e
+        else 
+          if style = "edge" then
+            Resource.edge_martelli e
+          else
+            G.E.label e
+    in
     m.(s).(d) <- (create r)
   ) g;
   m
@@ -49,7 +82,7 @@ let () =
   G.iter_edges_e (fun e ->
     let s = G.V.label (G.E.src e) in
     let d = G.V.label (G.E.dst e) in
-    printf "\t[%d:%s %d:%s]: %s\n%!" s.id s.label d.id d.label (MS.to_string m.(s.id).(d.id))
+    printf "\t[%s %s]: %s\n%!" s.label d.label (MS.to_string m.(s.id).(d.id))
   ) g
 
 (* Make Martelli Semiring *)
@@ -105,8 +138,8 @@ let () =
               let ms = solved.(s.id).(d.id) in
               highlight ms;
               if (!random_r > 0)
-              then printf "[%d:%s %d:%s %f]: %s\n%!" s.id s.label d.id d.label (prob ms) (MS.to_string ms)
-              else printf "[%d:%s %d:%s]: %s\n%!" s.id s.label d.id d.label (MS.to_string ms)
+              then printf "[%s %s %f]: %s\n%!" s.label d.label (prob ms) (MS.to_string ms)
+              else printf "[%s %s]: %s\n%!" s.label d.label (MS.to_string ms)
       done
     with
     | Exit -> (

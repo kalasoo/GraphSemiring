@@ -10,9 +10,14 @@ type server_info = {
   latitude  : float;
 }
 
+let trim str =
+  let l  = String.split ~on:' ' str in
+  let l' = List.filter l ~f:(fun s -> not (String.is_empty s)) in
+  String.concat l'
+
 let make_server_info ~id ~label ~country ~longitude ~latitude = {
   id;
-  label;
+  label = trim label;
   country;
   longitude;
   latitude;
@@ -52,22 +57,12 @@ let assign_server_info l =
   with Not_found -> default_server_info ()
 
 (* Edge *)
-let default_martelli_resource l =
-  match List.Assoc.find_exn l "source", List.Assoc.find_exn l "target" with
-  | Gml.Int source, Gml.Int target -> "((" ^ (Int.to_string source) ^ " " ^ (Int.to_string target) ^ "))"
-  | _ -> "(())"
-
-let classic_martelli_resource l =
-match List.Assoc.find_exn l "source", List.Assoc.find_exn l "target" with
-  | Gml.Int source, Gml.Int target -> "((" ^ (Int.to_string source) ^ ") (" ^ (Int.to_string target) ^ "))"
-  | _ -> "(())"  
-
 let label_edge_resource l =
   try
     match List.Assoc.find_exn l "label" with
     | Gml.String resource -> resource
-    | _                   -> classic_martelli_resource l
-  with Not_found -> classic_martelli_resource l
+    | _                   -> "(())"
+  with Not_found -> "(())"
 
 module G = Imperative.Digraph.AbstractLabeled(struct
   type t = server_info

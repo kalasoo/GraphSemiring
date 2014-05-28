@@ -98,6 +98,7 @@ module Make_Matrix_Semiring (Semiring : SEMIRING) = struct
     let _a = ref(a)
     and _m = ref(one n) in
     for i = 0 to n - 1 do
+      printf "\tloop %d\n%!" i;
       _m := plus  !_m !_a;
       _a := times !_a a
     done;
