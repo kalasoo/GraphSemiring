@@ -36,7 +36,7 @@ let to_position v =
 let random_color () =
   rgb (Random.int 256) (Random.int 256) (Random.int 256)
 
-let draw_arrow ?(color=black) ?(width=1) (xu,yu) (xv,yv) =
+let draw_arrow ?(color=black) ?(width=2) (xu,yu) (xv,yv) =
   set_color color;
   set_line_width width;
   let dx = float (xv - xu) in

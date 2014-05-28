@@ -204,6 +204,16 @@ module MS = struct
   let to_string a =
     Sexp.to_string (sexp_of_t a)
 
+  let contains ms rs =
+    fold_until ms ~init:false ~f:(fun acc rs' -> 
+      if (S.subset rs' rs)
+      then `Stop true
+      else `Continue false)
+
+  let rs_to_string rs =
+    let rs' = String.concat ~sep:" " (S.to_list rs) in
+    "(" ^ rs' ^ ")"
+
 end
 
 module MMS = Make_Matrix_Semiring(MS)

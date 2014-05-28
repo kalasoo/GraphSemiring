@@ -49,7 +49,7 @@ let () =
   G.iter_edges_e (fun e ->
     let s = (G.V.label (G.E.src e)).id in
     let t = (G.V.label (G.E.dst e)).id in
-    printf "\t[%d %d]: \t%s\n%!" s t (MS.to_string m.(s).(t))
+    printf "\t[%d %d]: %s\n%!" s t (MS.to_string m.(s).(t))
   ) g
 
 (* Make Martelli Semiring *)
@@ -59,20 +59,28 @@ let solved = MMS.solve m
 let highlight ms =
   MS.iter ms ~f:(fun rs ->
     let color = Visualize.random_color() in
-    G.iter_edges_e (fun e -> 
+    (* printf "Resource Set: %s, Color: %X\n" (MS.rs_to_string rs) color; *)
+    G.iter_edges_e (fun e ->
       let s = G.E.src e in
       let d = G.E.dst e in
       let s_info = G.V.label s in
       let d_info = G.V.label d in
       let ms' = m.(s_info.id).(d_info.id) in
-      let need_highlight = MS.fold_until ms' ~init:false ~f:(fun acc rs' -> 
-        if MS.S.is_empty (MS.S.inter rs rs')
-        then `Continue false
-        else `Stop true)
-      in
-      if need_highlight then Visualize.draw_highlight s d color
+      if MS.contains ms' rs
+      then (
+        (* printf "\t[%d %d]: %s\n%!" s_info.id d_info.id (MS.to_string ms'); *)
+        Visualize.draw_highlight s d color)
     ) g
   )
+
+let prob ms =
+  let product = MS.fold ms ~init:1. ~f:(fun acc rs -> 
+    let p = MS.S.fold rs ~init:1. ~f:(fun acc' r ->
+      acc' *. (Hashtbl.find_exn martelli_resources r))
+    in
+    acc *. (1. -. p))
+  in 
+  1. -. product
 
 let () =
   if !is_visualize
@@ -96,7 +104,9 @@ let () =
               let d = G.V.label dst in
               let ms = solved.(s.id).(d.id) in
               highlight ms;
-              printf "[%d %d]: %s\n%!" s.id d.id (MS.to_string ms)
+              if (!random_r > 0)
+              then printf "[%d %d %f]: %s\n%!" s.id d.id (prob ms) (MS.to_string ms)
+              else printf "[%d %d]: %s\n%!" s.id d.id (MS.to_string ms)
       done
     with
     | Exit -> (
