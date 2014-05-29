@@ -31,7 +31,7 @@ module Make_Matrix_Semiring (Semiring : SEMIRING) = struct
   exception Different_size
   exception Invalid_size
 
-  let zero n = Array.make_matrix n n Semiring.zero
+  let zero n = Array.make_matrix ~dimx:n ~dimy:n Semiring.zero
 
   let one  n = 
     let matrix = zero n in

@@ -21,7 +21,7 @@ let () =
        "-b", Arg.Set is_bidirectional,
        " to set each edge as bidirectional";
        "-m", Arg.Set_string martelli_style,
-       " <String> Martelli resources: random | basic | vertex | edge"
+       " <String> Martelli resources: random | basic | vertex | edge | color"
       ]
       (fun _ -> ())
       "usage: ./load.byte <options>"
@@ -66,13 +66,16 @@ let semiring_of_graph g zero create =
       if style = "random" && random > 0
       then Resource.random_martelli martelli_resources 
       else
-        if style = "vertex" then
-          Resource.vertex_martelli e
+        if style = "color" && random > 0
+        then Resource.random_martelli_color martelli_resources
         else 
-          if style = "edge" then
-            Resource.edge_martelli e
-          else
-            G.E.label e
+          if style = "vertex" then
+            Resource.vertex_martelli e
+          else 
+            if style = "edge" then
+              Resource.edge_martelli e
+            else
+              G.E.label e
     in
     m.(s).(d) <- (create r)
   ) g;

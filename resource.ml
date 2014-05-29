@@ -19,6 +19,11 @@ let make_resource ~name ~prob = {
 
 exception Invalid_resource_list
 
+let shuffle l =
+  let nl = List.map l ~f:(fun i -> (Random.bits (), i)) in
+  let sl = List.sort ~cmp:compare nl in
+  List.map sl ~f:snd
+
 (* resource list -> String.Set.t * float String.Table.t *)
 let of_resources_list rl =
   let t  = String.Table.create () in
@@ -42,11 +47,6 @@ let random_martelli t =
   let l = Hashtbl.keys t in
   let h = ref 0          in
   let t = Random.int (List.length l) in
-  let shuffle l =
-    let nl = List.map l ~f:(fun i -> (Random.bits (), i)) in
-    let sl = List.sort ~cmp:compare nl in
-    List.map sl ~f:snd 
-  in
   let sl = shuffle l in
   let ll = ref [] in
   let add_parentheses s = "(" ^ s ^ ")" in
@@ -59,6 +59,11 @@ let random_martelli t =
     h  := !h + sub;
   done;
   add_parentheses (String.concat (List.rev !ll))
+
+let random_martelli_color t =
+  let l  = Hashtbl.keys t in
+  let i  = Random.int (List.length l) in
+  "((" ^ (List.nth_exn l i) ^ "))"
 
 let vertex_martelli e =
   let s = G.V.label (G.E.src e) in
