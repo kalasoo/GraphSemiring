@@ -9,10 +9,10 @@ let ymax  = ref (-.90.)
 
 let round f = Float.to_int (Float.round_up f)
 let pi = 4.0 *. atan 1.0
-let vertex_radius = 5
+let vertex_radius = 8
 
 let create_graph g =
-  open_graph " 1250x800";
+  open_graph " 1250x850";
   G.iter_vertex (fun v -> 
     let v_info = G.V.label v      in
     let x      = v_info.longitude in
@@ -30,7 +30,7 @@ let to_position v =
   let x      = v_info.longitude in
   let y      = v_info.latitude  in
   let x'     = round (20. +. 1160. *. (x -. !xmin) /. (!xmax -. !xmin)) in
-  let y'     = round (20. +. 760. *. (y -. !ymin) /. (!ymax -. !ymin)) in
+  let y'     = round (70. +. 760. *. (y -. !ymin) /. (!ymax -. !ymin)) in
   x', y'
 
 let random_color a =
