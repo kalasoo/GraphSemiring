@@ -24,37 +24,21 @@ let make_server_info ~id ~label ~country ~longitude ~latitude = {
 }
 
 let assign_server_info l =
-  let default_server_info () =
-    make_server_info ~id:~-1 ~label:"<label>" ~country:"<country>" ~longitude:0.0 ~latitude:0.0
-  in
-  try 
-    let id =
-      match List.Assoc.find_exn l "id" with
-      | Gml.Int n -> n
-      | _         -> -1
-    in
-    let label =
-      match List.Assoc.find_exn l "label" with
-      | Gml.String s -> s
-      | _ -> "<label>"
-    in
-    let country =
-      match List.Assoc.find_exn l "Country" with
-      | Gml.String s -> s
-      | _ -> "<country>"
-    in
-    let longitude =
-      match List.Assoc.find_exn l "Longitude" with
-      | Gml.Float f -> f
-      | _ -> 0.0
-    in
-    let latitude =
-      match List.Assoc.find_exn l "Latitude" with
-      | Gml.Float f -> f
-      | _ -> 0.0
-    in
-    make_server_info ~id ~label ~country ~longitude ~latitude
-  with Not_found -> default_server_info ()
+  let id        = ref (-1)        in
+  let label     = ref "<label>"   in
+  let country   = ref "<country>" in
+  let longitude = ref 0.0         in
+  let latitude  = ref 0.0         in
+  try
+    id        := (match List.Assoc.find_exn l "id"        with Gml.Int    n -> n | _ -> !id);
+    label     := (match List.Assoc.find_exn l "label"     with Gml.String s -> s | _ -> !label);
+    country   := (match List.Assoc.find_exn l "Country"   with Gml.String s -> s | _ -> !country);
+    longitude := (match List.Assoc.find_exn l "Longitude" with Gml.Float  f -> f | _ -> !longitude);
+    latitude  := (match List.Assoc.find_exn l "Latitude"  with Gml.Float  f -> f | _ -> !latitude);
+    (* printf "%d %s %s %f %f\n" !id !label !country !longitude !latitude; *)
+    make_server_info ~id:!id ~label:!label ~country:!country ~longitude:!longitude ~latitude:!latitude
+  with Not_found ->
+    make_server_info ~id:!id ~label:!label ~country:!country ~longitude:!longitude ~latitude:!latitude
 
 (* Edge *)
 let label_edge_resource l =

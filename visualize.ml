@@ -12,7 +12,7 @@ let pi = 4.0 *. atan 1.0
 let vertex_radius = 5
 
 let create_graph g =
-  open_graph " 850x600";
+  open_graph " 1250x800";
   G.iter_vertex (fun v -> 
     let v_info = G.V.label v      in
     let x      = v_info.longitude in
@@ -29,14 +29,17 @@ let to_position v =
   let v_info = G.V.label v      in
   let x      = v_info.longitude in
   let y      = v_info.latitude  in
-  let x'     = round (20. +. 760. *. (x -. !xmin) /. (!xmax -. !xmin)) in
-  let y'     = round (20. +. 560. *. (y -. !ymin) /. (!ymax -. !ymin)) in
+  let x'     = round (20. +. 1160. *. (x -. !xmin) /. (!xmax -. !xmin)) in
+  let y'     = round (20. +. 760. *. (y -. !ymin) /. (!ymax -. !ymin)) in
   x', y'
 
-let random_color () =
-  rgb (Random.int 256) (Random.int 256) (Random.int 256)
+let random_color a =
+  let r = Hashtbl.hash a in
+  let g = r / 3 in 
+  let b = r / 5 in
+  rgb (r % 64 + 64) (g % 64 + 64) (b % 64 + 64)
 
-let draw_arrow ?(color=black) ?(width=1) (xu,yu) (xv,yv) =
+let draw_arrow ?(color=black) ?(width=2) (xu,yu) (xv,yv) =
   set_color color;
   set_line_width width;
   let dx = float (xv - xu) in
@@ -63,8 +66,8 @@ let color_vertex v color =
   set_color color;
   fill_circle x y vertex_radius
 
-let draw_highlight s d color =
-  draw_arrow ?color:(Some color) (to_position s) (to_position d)
+let draw_highlight ?(color=red) s d =
+  draw_arrow ~color:color (to_position s) (to_position d)
 
 type selection =
   | No
@@ -109,6 +112,11 @@ let draw_graph g =
   ) g;
   (* selection *)
   draw_selection ()
+
+let draw_result s =
+  set_color black;
+  moveto 5 5;
+  draw_string s
 
 exception Clicked of G.vertex
 

@@ -30,6 +30,18 @@ let () =
 let () = print_section "Load graph"
 let g = graph_of_gml !input_gml_file
 let martelli_resources = Resource.random_resources !random_r
+let prob ms =
+  if MS.length ms = 0 then 0.
+  else
+    let product = MS.fold ms ~init:1. ~f:(fun acc rs ->
+      if MS.S.length rs = 0 then acc
+      else
+        let p = MS.S.fold rs ~init:1. ~f:(fun acc' r ->
+          acc' *. (Hashtbl.find_exn martelli_resources r))
+        in
+        acc *. (1. -. p))
+    in
+    product
 
 (* Bidirectional *)
 let () =
@@ -92,36 +104,23 @@ let () =
 (* Make Martelli Semiring *)
 let () = print_section "Solve Semiring"
 let solved = MMS.solve m
-
-let highlight ms =
-  MS.iter ms ~f:(fun rs ->
-    let color = Visualize.random_color() in
-    (* printf "Resource Set: %s, Color: %X\n" (MS.rs_to_string rs) color; *)
-    G.iter_edges_e (fun e ->
-      let s = G.E.src e in
-      let d = G.E.dst e in
-      let s_info = G.V.label s in
-      let d_info = G.V.label d in
-      let ms' = m.(s_info.id).(d_info.id) in
-      if MS.contains ms' rs
-      then (
-        (* printf "\t[%d %d]: %s\n%!" s_info.id d_info.id (MS.to_string ms'); *)
-        Visualize.draw_highlight s d color)
-    ) g
-  )
-
-let prob ms =
-  if MS.length ms = 0 then 0.
-  else
-    let product = MS.fold ms ~init:1. ~f:(fun acc rs ->
-      if MS.S.length rs = 0 then acc
-      else
-        let p = MS.S.fold rs ~init:1. ~f:(fun acc' r ->
-          acc' *. (Hashtbl.find_exn martelli_resources r))
-        in
-        acc *. (1. -. p))
-    in
-    product
+let current_highlight = Highlight.create MS.zero
+let current_result = ref ""
+let update_current_result s_label d_label ms =
+  if !random_r > 0
+  then current_result := (sprintf "[%s %s %f]: %s%!" s_label d_label (prob ms) (MS.to_string ms))
+  else current_result := (sprintf "[%s %s]: %s%!" s_label d_label (MS.to_string ms))
+let highlight rs =
+  (* printf "Resource Set: %s, Color: %X\n" (MS.rs_to_string rs) color; *)
+  G.iter_edges_e (fun e ->
+    let s = G.E.src e in
+    let d = G.E.dst e in
+    let s_info = G.V.label s in
+    let d_info = G.V.label d in
+    let ms' = m.(s_info.id).(d_info.id) in
+    if MS.contains ms' rs
+    then Visualize.draw_highlight s d
+  ) g
 
 let () =
   if !is_visualize
@@ -133,6 +132,11 @@ let () =
       while true do
         let st = Graphics.wait_next_event [ Key_pressed; Button_down ] in
         if st.keypressed then match st.key with
+        | 'n' ->
+          Visualize.draw_graph g;
+          Highlight.next current_highlight;
+          highlight (List.nth_exn current_highlight.msl current_highlight.index);
+          Visualize.draw_result !current_result
         | 'q' -> raise Exit
         | _   -> ()
         else
@@ -144,10 +148,10 @@ let () =
               let s = G.V.label src in
               let d = G.V.label dst in
               let ms = solved.(s.id).(d.id) in
-              highlight ms;
-              if (!random_r > 0)
-              then printf "[%s %s %f]: %s\n%!" s.label d.label (prob ms) (MS.to_string ms)
-              else printf "[%s %s]: %s\n%!" s.label d.label (MS.to_string ms)
+              Highlight.update current_highlight ms;
+              highlight (List.nth_exn current_highlight.msl current_highlight.index);
+              update_current_result s.label d.label ms;
+              Visualize.draw_result !current_result
       done
     with
     | Exit -> (
