@@ -47,7 +47,6 @@ usage: ./load.byte <options>
 
 #### .gml file
 
-.gml graph file:
 ```gml
 graph [
   node [
