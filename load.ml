@@ -7,7 +7,7 @@ let print_section s = print_endline ("\n>>> " ^ s)
 (* Args *)
 let input_gml_file   = ref "graphs/basic_martelli.gml"
 let random_r         = ref (-1)
-let is_visualize     = ref true
+let is_visualize     = ref false
 let is_bidirectional = ref false
 let martelli_style   = ref "basic"
 let () =
@@ -17,7 +17,7 @@ let () =
        "-r", Arg.Set_int random_r,
        " <Int> amount of the resources";
        "-v", Arg.Set is_visualize,
-       " to disable graph visualization";
+       " to enable graph visualization";
        "-b", Arg.Set is_bidirectional,
        " to set each edge as bidirectional";
        "-m", Arg.Set_string martelli_style,
