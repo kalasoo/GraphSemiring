@@ -66,18 +66,15 @@ module Make_Matrix_Semiring (Semiring : SEMIRING) = struct
       matrix
 
   let inner_times a_row b_col =
-    let result = ref (Semiring.zero) in
-    Array.iteri (fun i a_i -> 
-      result := Semiring.plus !result (Semiring.times a_i b_col.(i)) 
-    ) a_row;
-    !result
+    List.foldi
+      b_col
+      ~init:Semiring.zero
+      ~f:(fun i acc b_i ->
+        Semiring.plus acc (Semiring.times a_row.(i) b_i)
+      )
 
   let column n j matrix =
-    let col = Array.create n Semiring.zero in
-    for i = 0 to n - 1 do
-      col.(i) <- matrix.(i).(j)
-    done;
-    col
+    List.init n ~f:(fun i -> matrix.(i).(j))
 
   let times a b =
     match same_size a b with
@@ -177,36 +174,28 @@ end
 
 module MMPS = Make_Matrix_Semiring(MPS)
 
-(** Martelli Semiring *)
+(** Martelli Semiring / Cutset Semiring *)
 module MS = struct
   
   module S = Set.Make(String)
 
   include Set.Make(S)
 
-  (* let zero = empty *)
   let zero = add empty S.empty
 
-  (* let one = add empty S.empty *)
   let one = empty
 
-  let reduce a = 
+  let reduce a =
     let not_subset set = for_all a ~f:(fun a_set -> not (S.subset a_set set) || S.equal a_set set) in
     filter a ~f:not_subset
 
-  (* let plus a b =
-    reduce (union a b) *)
   let plus a b =
     let fold_element s a_set = fold b ~init:s ~f:(fun s_iter b_set -> add s_iter (S.union a_set b_set)) in
     reduce (fold a ~init:empty ~f:fold_element )
 
-  (* let times a b =
-    let fold_element s a_set = fold b ~init:s ~f:(fun s_iter b_set -> add s_iter (S.union a_set b_set)) in
-    reduce (fold a ~init:empty ~f:fold_element ) *)
   let times a b =
     reduce (union a b)
     
-
   let create s =
     reduce (t_of_sexp (Sexp.of_string s))
 
@@ -214,7 +203,7 @@ module MS = struct
     Sexp.to_string (sexp_of_t a)
 
   let contains ms rs =
-    fold_until ms ~init:false ~f:(fun acc rs' -> 
+    fold_until ms ~init:false ~f:(fun acc rs' ->
       if (S.subset rs' rs)
       then `Stop true
       else `Continue false)
@@ -226,6 +215,48 @@ module MS = struct
 end
 
 module MMS = Make_Matrix_Semiring(MS)
+
+(** Pathset Semiring *)
+module PSS = struct
+
+  module S = Set.Make(String)
+
+  include Set.Make(S)
+
+  let zero = empty
+
+  let one = add empty S.empty
+
+  let reduce a =
+    let not_subset set = for_all a ~f:(fun a_set -> not (S.subset a_set set) || S.equal a_set set) in
+    filter a ~f:not_subset
+
+  let plus a b =
+    reduce (union a b)
+
+  let times a b =
+    let fold_element s a_set = fold b ~init:s ~f:(fun s_iter b_set -> add s_iter (S.union a_set b_set)) in
+    reduce (fold a ~init:empty ~f:fold_element )
+
+  let create s =
+    reduce (t_of_sexp (Sexp.of_string s))
+
+  let to_string a =
+    Sexp.to_string (sexp_of_t a)
+
+  let contains ms rs =
+    fold_until ms ~init:false ~f:(fun acc rs' ->
+      if (S.subset rs' rs)
+      then `Stop true
+      else `Continue false)
+
+  let rs_to_string rs =
+    let rs' = String.concat ~sep:" " (S.to_list rs) in
+    "(" ^ rs' ^ ")"
+
+end
+
+module MPSS = Make_Matrix_Semiring(PSS)
 
 (** Boolean Semiring *)
 module BS = struct

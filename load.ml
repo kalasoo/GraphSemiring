@@ -77,6 +77,7 @@ let semiring_of_graph g zero create =
     m.(s).(d) <- (create r)
   ) g;
   m
+
 let m = semiring_of_graph g MMS.zero MS.create
 let () =
   G.iter_edges_e (fun e ->
@@ -107,13 +108,17 @@ let highlight ms =
   )
 
 let prob ms =
-  let product = MS.fold ms ~init:1. ~f:(fun acc rs -> 
-    let p = MS.S.fold rs ~init:1. ~f:(fun acc' r ->
-      acc' *. (Hashtbl.find_exn martelli_resources r))
+  if MS.length ms = 0 then 0.
+  else
+    let product = MS.fold ms ~init:1. ~f:(fun acc rs ->
+      if MS.S.length rs = 0 then acc
+      else
+        let p = MS.S.fold rs ~init:1. ~f:(fun acc' r ->
+          acc' *. (Hashtbl.find_exn martelli_resources r))
+        in
+        acc *. (1. -. p))
     in
-    acc *. (1. -. p))
-  in 
-  1. -. product
+    product
 
 let () =
   if !is_visualize
