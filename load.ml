@@ -17,7 +17,7 @@ let () =
        "-r", Arg.Set_int random_r,
        " <Int> amount of the resources";
        "-v", Arg.Set is_visualize,
-       " to visualize the graph";
+       " to disable graph visualization";
        "-b", Arg.Set is_bidirectional,
        " to set each edge as bidirectional";
        "-m", Arg.Set_string martelli_style,
