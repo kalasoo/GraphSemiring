@@ -9,7 +9,7 @@ let ymax  = ref (-.90.)
 
 let round f = Float.to_int (Float.round_up f)
 let pi = 4.0 *. atan 1.0
-let vertex_radius = 8
+let vertex_radius = 5
 
 let create_graph g =
   open_graph " 1250x850";
