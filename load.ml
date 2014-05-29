@@ -151,6 +151,7 @@ let () =
               Highlight.update current_highlight ms;
               highlight (List.nth_exn current_highlight.msl current_highlight.index);
               update_current_result s.label d.label ms;
+              printf "%s\n" !current_result;
               Visualize.draw_result !current_result
       done
     with
