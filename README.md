@@ -121,16 +121,16 @@ $ ./load.byte -m edge -b -v
 10 edges:
 
 >>> Make Martelli Semiring
-  [NY54 WASH]: ((NY54_WASH))
-  [NY54 PTLD]: ((NY54_PTLD))
-  [WASH NY54]: ((WASH_NY54))
-  [WASH PTLD]: ((WASH_PTLD))
-  [WASH DLLS]: ((WASH_DLLS))
-  [PTLD NY54]: ((PTLD_NY54))
-  [PTLD WASH]: ((PTLD_WASH))
-  [PTLD DLLS]: ((PTLD_DLLS))
-  [DLLS WASH]: ((DLLS_WASH))
-  [DLLS PTLD]: ((DLLS_PTLD))
+  [NY54 WASH] : ((NY54_WASH))
+  [NY54 PTLD] : ((NY54_PTLD))
+  [WASH NY54] : ((WASH_NY54))
+  [WASH PTLD] : ((WASH_PTLD))
+  [WASH DLLS] : ((WASH_DLLS))
+  [PTLD NY54] : ((PTLD_NY54))
+  [PTLD WASH] : ((PTLD_WASH))
+  [PTLD DLLS] : ((PTLD_DLLS))
+  [DLLS WASH] : ((DLLS_WASH))
+  [DLLS PTLD] : ((DLLS_PTLD))
 
 >>> Solve Semiring
   loop 0
