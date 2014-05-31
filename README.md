@@ -34,11 +34,12 @@ make
 ```
 $ ./load.byte --help
 usage: ./load.byte <options>
-  -g  <String> path to gml file
-  -r  <Int> amount of the resources
-  -v  to enable graph visualization
+  -g  <String> path to the input gml file
+  -r  to read the visualize the original graph
+  -m  <String> Martelli resources modes: basic | random | color | vertex | edge
+  -a  <Int> amount of the resources
   -b  to set each edge as bidirectional
-  -m  <String> Martelli resources: random | basic | vertex | edge | color
+  -o  set to output solved graph
   -help  Display this list of options
   --help  Display this list of options
 ```
@@ -143,8 +144,8 @@ $ ./load.byte -m edge -b -v
 #### Resources modes
 
 1. `-m basic`: read the edge label as resources.
-2. `-m random -r N`: each edge is assigned with a random combination of N resources.
-3. `-m color -r N`: each edge is assigned with one resource from N resources.
+2. `-m random -a N`: each edge is assigned with a random combination of N resources.
+3. `-m color -a N`: each edge is assigned with one resource from N resources.
 4. `-m vertex`: assume an edge `e` is defined as `<v1, v2>`, the resources assigned to this edge is `((v1) (v2))`, which means the edge fails if either `v1` or `v2` fails.
 5. `-m edge`: each edge `e` is assigned with one resource as `((e))`.
 
