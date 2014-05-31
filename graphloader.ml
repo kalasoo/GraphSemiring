@@ -23,20 +23,20 @@ let make_server_info ~id ~label ~country ~longitude ~latitude = {
   latitude;
 }
 
-let assign_server_info l =
+let assign_server_info ?(read_only=false) l =
   let id        = ref (-1)        in
   let label     = ref "<label>"   in
   let country   = ref "<country>" in
   let longitude = ref 0.0         in
   let latitude  = ref 0.0         in
-  try
-    id        := (match List.Assoc.find_exn l "id"        with Gml.Int    n -> n | _ -> !id);
+  try begin
+    id        := (match List.Assoc.find_exn l "id"        with Gml.Int    n -> if read_only then n - 1 else n | _ -> !id);
     label     := (match List.Assoc.find_exn l "label"     with Gml.String s -> s | _ -> !label);
     country   := (match List.Assoc.find_exn l "Country"   with Gml.String s -> s | _ -> !country);
     longitude := (match List.Assoc.find_exn l "Longitude" with Gml.Float  f -> f | _ -> !longitude);
     latitude  := (match List.Assoc.find_exn l "Latitude"  with Gml.Float  f -> f | _ -> !latitude);
-    (* printf "%d %s %s %f %f\n" !id !label !country !longitude !latitude; *)
     make_server_info ~id:!id ~label:!label ~country:!country ~longitude:!longitude ~latitude:!latitude
+  end
   with Not_found ->
     make_server_info ~id:!id ~label:!label ~country:!country ~longitude:!longitude ~latitude:!latitude
 
@@ -52,42 +52,38 @@ module G = Imperative.Digraph.AbstractLabeled(struct
   type t = server_info
 end)(struct
   type t = string
-  let compare     = compare
-  let default     = ""
+  let compare = compare
+  let default = ""
 end)
 
 module B = Builder.I(G)
 
-module NodeEdgeParser = struct
-
-  let node l = assign_server_info l
-
+module GmlParser  = Gml.Parse (B) (struct
+  let node l = assign_server_info ~read_only:false l
   let edge l = label_edge_resource l
+end)
 
-end
+module GmlReader  = Gml.Parse (B) (struct
+  let node l = assign_server_info ~read_only:true l
+  let edge l = label_edge_resource l
+end)
 
-module NodeEdgePrinter = struct
-
+module GmlPrinter = Gml.Print (G) (struct
   let node (v : G.V.label) = [
-    "id"        , Gml.Int    v.id;
     "label"     , Gml.String v.label;
-    "country"   , Gml.String v.country;
-    "longitude" , Gml.Float  v.longitude;
-    "latitude"  , Gml.Float  v.latitude;
+    "Country"   , Gml.String v.country;
+    "Longitude" , Gml.Float  v.longitude;
+    "Latitude"  , Gml.Float  v.latitude;
   ]
-
   let edge (e : G.E.label) = ["label", Gml.String e]
-
-end
-
-module GmlParser  = Gml.Parse (B) (NodeEdgeParser)
-module GmlPrinter = Gml.Print (G) (NodeEdgePrinter)
+end)
 
 exception Not_GML_file
 
-let graph_of_gml f = 
+let graph_of_gml ?(read_only=false) f = 
   if Filename.check_suffix f ".gml" 
-  then GmlParser.parse f
+  then
+    if read_only then GmlReader.parse f else GmlParser.parse f
   else raise Not_GML_file
   
 let gml_of_graph g f =
