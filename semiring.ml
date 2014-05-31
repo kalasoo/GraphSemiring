@@ -212,6 +212,20 @@ module MS = struct
     let rs' = String.concat ~sep:" " (S.to_list rs) in
     "(" ^ rs' ^ ")"
 
+  (* martelli_resources : key = 'resource' ; data = probability_of_failure *)
+  let prob ms martelli_resources =
+    if length ms = 0 then 0.
+    else
+      let product = fold ms ~init:1. ~f:(fun acc rs ->
+        if S.length rs = 0 then acc
+        else
+          let p = S.fold rs ~init:1. ~f:(fun acc' r ->
+            acc' *. (Hashtbl.find_exn martelli_resources r))
+          in
+          acc *. (1. -. p))
+      in
+      product
+
 end
 
 module MMS = Make_Matrix_Semiring(MS)
@@ -253,6 +267,20 @@ module PSS = struct
   let rs_to_string rs =
     let rs' = String.concat ~sep:" " (S.to_list rs) in
     "(" ^ rs' ^ ")"
+
+  (* martelli_resources : key = 'resource' ; data = probability_of_operational *)
+  let prob ms martelli_resources =
+    if length ms = 0 then 0.
+    else
+      let product = fold ms ~init:1. ~f:(fun acc rs ->
+        if S.length rs = 0 then acc
+        else
+          let p = S.fold rs ~init:1. ~f:(fun acc' r ->
+            acc' *. (Hashtbl.find_exn martelli_resources r))
+          in
+          acc *. (1. -. p))
+      in
+      1. -. product
 
 end
 
