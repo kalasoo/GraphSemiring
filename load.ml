@@ -6,22 +6,25 @@ let print_section s = print_endline ("\n>>> " ^ s)
 
 (* Args *)
 let input_gml_file   = ref "graphs/basic_martelli.gml"
-let random_r         = ref (-1)
-let is_visualize     = ref false
+let read_only        = ref false
+let mode             = ref "basic"
+let resources_size   = ref (-1)
 let is_bidirectional = ref false
-let martelli_style   = ref "basic"
+let output_gml_file  = ref "graphs/solved_"
 let () =
   Arg.parse
       ["-g", Arg.Set_string input_gml_file,
-       " <String> path to gml file";
-       "-r", Arg.Set_int random_r,
+       " <String> path to the input gml file";
+       "-r", Arg.Set read_only,
+       " to read the visualize the original graph";
+       "-m", Arg.Set_string mode,
+       " <String> Martelli resources modes: basic | random | color | vertex | edge";
+       "-a", Arg.Set_int resources_size,
        " <Int> amount of the resources";
-       "-v", Arg.Set is_visualize,
-       " to enable graph visualization";
        "-b", Arg.Set is_bidirectional,
        " to set each edge as bidirectional";
-       "-m", Arg.Set_string martelli_style,
-       " <String> Martelli resources: random | basic | vertex | edge | color"
+       "-o", Arg.Set_string output_gml_file,
+       " <String> path to the output gml file";
       ]
       (fun _ -> ())
       "usage: ./load.byte <options>"
@@ -29,19 +32,7 @@ let () =
 (* Load graph *)
 let () = print_section "Load graph"
 let g = graph_of_gml !input_gml_file
-let martelli_resources = Resource.random_resources !random_r
-let prob ms =
-  if MS.length ms = 0 then 0.
-  else
-    let product = MS.fold ms ~init:1. ~f:(fun acc rs ->
-      if MS.S.length rs = 0 then acc
-      else
-        let p = MS.S.fold rs ~init:1. ~f:(fun acc' r ->
-          acc' *. (Hashtbl.find_exn martelli_resources r))
-        in
-        acc *. (1. -. p))
-    in
-    product
+let martelli_resources = Resource.random_resources !resources_size
 
 (* Bidirectional *)
 let () =
@@ -67,8 +58,8 @@ let () =
 (* Make Semiring *)
 let () = print_section "Make Martelli Semiring"
 let semiring_of_graph g zero create =
-  let style  = !martelli_style in
-  let random = !random_r       in
+  let style  = !mode in
+  let random = !resources_size       in
   let n = G.nb_vertex g in
   let m = zero n        in
   G.iter_edges_e (fun e -> 
@@ -107,8 +98,8 @@ let solved = MMS.solve m
 let current_highlight = Highlight.create MS.zero
 let current_result = ref ""
 let update_current_result s_label d_label ms =
-  if !random_r > 0
-  then current_result := (sprintf "[%s %s %f]: %s%!" s_label d_label (prob ms) (MS.to_string ms))
+  if !resources_size > 0
+  then current_result := (sprintf "[%s %s %f]: %s%!" s_label d_label (MS.prob ms martelli_resources) (MS.to_string ms))
   else current_result := (sprintf "[%s %s]: %s%!" s_label d_label (MS.to_string ms))
 let highlight rs =
   (* printf "Resource Set: %s, Color: %X\n" (MS.rs_to_string rs) color; *)
@@ -122,42 +113,42 @@ let highlight rs =
     then Visualize.draw_highlight s d
   ) g
 
+(* Draw Graph *)
 let () =
-  if !is_visualize
-  then
-    (* Draw Graph *)
-    try
-      Visualize.create_graph g;
-      Visualize.draw_graph g;
-      while true do
-        let st = Graphics.wait_next_event [ Key_pressed; Button_down ] in
-        if st.keypressed then match st.key with
-        | 'n' ->
-          Visualize.draw_graph g;
-          Highlight.next current_highlight;
-          highlight (List.nth_exn current_highlight.msl current_highlight.index);
-          Visualize.draw_result !current_result
-        | 'q' -> raise Exit
-        | _   -> ()
-        else
-          if st.button 
-          then 
-            match Visualize.select g with
-            | None -> ()
-            | Some (src, dst) ->
-              let s = G.V.label src in
-              let d = G.V.label dst in
-              let ms = solved.(s.id).(d.id) in
-              Highlight.update current_highlight ms;
-              highlight (List.nth_exn current_highlight.msl current_highlight.index);
-              update_current_result s.label d.label ms;
-              printf "%s\n%!" !current_result;
-              Visualize.draw_result !current_result
-      done
-    with
-    | Exit -> (
-      print_section "end";
-      Visualize.end_graph ()
+  try
+    Visualize.create_graph g;
+    Visualize.draw_graph g;
+    while true do
+      let st = Graphics.wait_next_event [ Key_pressed; Button_down ] in
+      if st.keypressed then match st.key with
+      | 'n' ->
+        Visualize.draw_graph g;
+        Highlight.next current_highlight;
+        highlight (List.nth_exn current_highlight.msl current_highlight.index);
+        Visualize.draw_result !current_result
+      | 'q' -> raise Exit
+      | _   -> ()
+      else
+        if st.button 
+        then 
+          match Visualize.select g with
+          | None -> ()
+          | Some (src, dst) ->
+            let s = G.V.label src in
+            let d = G.V.label dst in
+            let ms = solved.(s.id).(d.id) in
+            Highlight.update current_highlight ms;
+            highlight (List.nth_exn current_highlight.msl current_highlight.index);
+            update_current_result s.label d.label ms;
+            printf "%s\n%!" !current_result;
+            Visualize.draw_result !current_result
+    done
+  with
+  | Exit -> (
+    print_section "end";
+    Visualize.end_graph ()
     )
-    else
-      MMS.print solved
+
+(* Output gml *)
+(* let () =
+  MMS.print solved *)
