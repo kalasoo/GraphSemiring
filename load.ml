@@ -42,7 +42,7 @@ let () =
     G.iter_edges_e (fun e -> 
       let s     = G.E.src e in
       let d     = G.E.dst e in
-      let label = G.E.label e in
+      let label = make_edge_info ~label:(G.E.label e).label ~real:true in
       let e'    = G.E.create d label s in
       G.add_edge_e g e'
     ) g
@@ -66,20 +66,30 @@ let semiring_of_graph g zero create =
   G.iter_edges_e (fun e -> 
     let s = (G.V.label (G.E.src e)).id in
     let d = (G.V.label (G.E.dst e)).id in
+    let label = (G.E.label e).label in
     let r =
-      if !read_only then G.E.label e
+      if !read_only then label
       else
         match style with
-        | "random" -> if random > 0 then Resource.random_martelli martelli_resources else G.E.label e
-        | "color"  -> if random > 0 then Resource.random_martelli_color martelli_resources else G.E.label e
+        | "random" -> if random > 0 then Resource.random_martelli martelli_resources else label
+        | "color"  -> if random > 0 then Resource.random_martelli_color martelli_resources else label
         | "vertex" -> Resource.vertex_martelli e
         | "edge"   -> Resource.edge_martelli e
-        | _        -> G.E.label e
+        | _        -> label
     in
     m.(s).(d) <- (create r)
   ) g;
   m
 let m = semiring_of_graph g MMS.zero MS.create
+
+(* Read Only *)
+let () =
+  if !read_only
+  then
+    G.iter_edges_e (fun e ->
+      if not (G.E.label e).real then G.remove_edge_e g e
+    ) g
+
 let () =
   G.iter_edges_e (fun e ->
     let s = G.V.label (G.E.src e) in
@@ -88,13 +98,8 @@ let () =
   ) g
 
 (* Solve Semiring *)
-let solved = ref m
-let () =
-  if !read_only
-  then print_section "Read Only"
-  else (
-    print_section "Solve Semiring";
-    solved := MMS.solve m)
+let () = if !read_only then print_section "Read Only" else print_section "Solve Semiring"
+let solved = if !read_only then m else MMS.solve m
 
 (* Viusalization *)
 let current_highlight = Highlight.create MS.zero
@@ -120,26 +125,29 @@ let () =
   if (!output_gml && not !read_only)
   then
     let prefix   = prefix ^ "solved" in
-    let solved_m = !solved in
     let style    = !mode in
     let fl       =
       match style with
       | "random" | "color" -> [style; (Int.to_string !resources_size); !input_gml_file]
       | _ -> [style; !input_gml_file]
     in
-    print_section "Output";
-    G.iter_edges_e (fun e ->
-      let s = G.E.src e in
-      let d = G.E.dst e in
-      let s_info = G.V.label s in
-      let d_info = G.V.label d in
-      let label = MS.to_string solved_m.(s_info.id).(d_info.id) in
-      let e'    = G.E.create d label s in
-      G.remove_edge_e g e;
-      G.add_edge_e    g e'
-    ) g;
-    let f = String.concat ~sep:"_" (prefix :: fl) in
-    gml_of_graph g f
+    let f  = String.concat ~sep:"_" (prefix :: fl) in
+    let g' = G.copy g in
+    print_section ("Output: " ^ f);
+    G.iter_edges_e (fun e -> G.remove_edge_e g' e) g';
+    G.iter_vertex (fun s ->
+      G.iter_vertex (fun d ->
+        if s <> d
+        then
+          let s_info = G.V.label s in
+          let d_info = G.V.label d in
+          let label  = MS.to_string solved.(s_info.id).(d_info.id) in
+          let real   = G.mem_edge g s d in
+          let e'     = G.E.create s (make_edge_info ~label ~real) d in
+          G.add_edge_e g' e'
+      ) g'
+    ) g';
+    gml_of_graph g' f
   else
     print_section "No Output"
 
@@ -147,7 +155,6 @@ let () =
 let () =
   print_section "Visualization";
   try
-    let solved_m = !solved in
     Visualize.create_graph g;
     Visualize.draw_graph g;
     while true do
@@ -168,7 +175,7 @@ let () =
           | Some (src, dst) ->
             let s = G.V.label src in
             let d = G.V.label dst in
-            let ms = solved_m.(s.id).(d.id) in
+            let ms = solved.(s.id).(d.id) in
             Highlight.update current_highlight ms;
             highlight (List.nth_exn current_highlight.msl current_highlight.index);
             update_current_result s.label d.label ms;

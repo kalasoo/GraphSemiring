@@ -58,27 +58,74 @@ graph [
   edge [
     source 1
     target 2
-    label "((r0 r1 r2 r5 r6 r8)(r3 r7 r9))"
+    label "((NY54)(WASH))"
+    real "true"
   ]
   edge [
     source 1
     target 3
-    label "((r0 r1 r2 r5 r6 r8)(r0 r1 r9)(r0 r7))"
+    label "((NY54)(PTLD))"
+    real "true"
+  ]
+  edge [
+    source 1
+    target 4
+    label "((DLLS)(NY54)(PTLD WASH))"
+    real "false"
+  ]
+  edge [
+    source 2
+    target 1
+    label "(())"
+    real "false"
   ]
   edge [
     source 2
     target 3
-    label "((r1 r9)(r7))"
+    label "((PTLD)(WASH))"
+    real "true"
   ]
   edge [
     source 2
     target 4
-    label "((r0 r1 r2 r3 r5 r7 r8 r9))"
+    label "((DLLS)(WASH))"
+    real "true"
+  ]
+  edge [
+    source 3
+    target 1
+    label "(())"
+    real "false"
+  ]
+  edge [
+    source 3
+    target 2
+    label "(())"
+    real "false"
   ]
   edge [
     source 3
     target 4
-    label "((r0 r3 r4 r5 r6 r7 r8 r9))"
+    label "((DLLS)(PTLD))"
+    real "true"
+  ]
+  edge [
+    source 4
+    target 1
+    label "(())"
+    real "false"
+  ]
+  edge [
+    source 4
+    target 2
+    label "(())"
+    real "false"
+  ]
+  edge [
+    source 4
+    target 3
+    label "(())"
+    real "false"
   ]
 ]
 

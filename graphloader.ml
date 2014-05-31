@@ -41,19 +41,38 @@ let assign_server_info ?(read_only=false) l =
     make_server_info ~id:!id ~label:!label ~country:!country ~longitude:!longitude ~latitude:!latitude
 
 (* Edge *)
-let label_edge_resource l =
-  try
-    match List.Assoc.find_exn l "label" with
-    | Gml.String resource -> resource
-    | _                   -> "(())"
-  with Not_found -> "(())"
+type edge_info = {
+  label : string;
+  real  : bool;
+}
 
-module G = Imperative.Digraph.AbstractLabeled(struct
+let make_edge_info ~label ~real = {
+  label;
+  real;
+}
+
+let label_edge_resource l =
+  let label = ref "(())" in
+  let real  = ref true   in
+  try begin
+    label := (match List.Assoc.find_exn l "label" with Gml.String resource -> resource | _ -> !label);
+    real  := (
+      match List.Assoc.find_exn l "real"  with 
+      | Gml.String is_real  -> not (is_real = "false")
+      | _ -> !real);
+    make_edge_info ~label:!label ~real:!real
+  end
+  with Not_found -> make_edge_info ~label:!label ~real:!real
+
+module G = Imperative.Digraph.ConcreteLabeled(struct
   type t = server_info
+  let compare v1 v2 = compare v1.id v2.id
+  let hash          = Hashtbl.hash
+  let equal   v1 v2 = (v1.id = v2.id && v1.label = v2.label)
 end)(struct
-  type t = string
+  type t = edge_info
   let compare = compare
-  let default = ""
+  let default = make_edge_info ~label:"(())" ~real:true
 end)
 
 module B = Builder.I(G)
@@ -70,12 +89,15 @@ end)
 
 module GmlPrinter = Gml.Print (G) (struct
   let node (v : G.V.label) = [
-    "label"     , Gml.String v.label;
-    "Country"   , Gml.String v.country;
-    "Longitude" , Gml.Float  v.longitude;
-    "Latitude"  , Gml.Float  v.latitude;
+    "label",     Gml.String v.label;
+    "Country",   Gml.String v.country;
+    "Longitude", Gml.Float  v.longitude;
+    "Latitude",  Gml.Float  v.latitude;
   ]
-  let edge (e : G.E.label) = ["label", Gml.String e]
+  let edge (e : G.E.label) = [
+    "label", Gml.String e.label;
+    "real", Gml.String (if e.real then "true" else "false");
+  ]
 end)
 
 exception Not_GML_file
