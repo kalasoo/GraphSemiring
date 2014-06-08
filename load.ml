@@ -109,16 +109,30 @@ let update_current_result s_label d_label ms =
   then current_result := (sprintf "[%s %s %f]: %s%!" s_label d_label (MS.prob ms martelli_resources) (MS.to_string ms))
   else current_result := (sprintf "[%s %s]: %s%!" s_label d_label (MS.to_string ms))
 let highlight rs =
-  (* printf "Resource Set: %s, Color: %X\n" (MS.rs_to_string rs) color; *)
+  (* HIGHLIGHT VERTICES *)
   G.iter_edges_e (fun e ->
     let s = G.E.src e in
     let d = G.E.dst e in
     let s_info = G.V.label s in
     let d_info = G.V.label d in
-    let ms' = m.(s_info.id).(d_info.id) in
-    if MS.contains ms' rs
-    then Visualize.draw_highlight s d
-  ) g
+    let ms     = m.(s_info.id).(d_info.id) in
+    if MS.contains ms rs
+    then Visualize.highlight_edge s d
+  ) g;
+  (* HIGHLIGHT EDGES *)
+  let zero = MS.zero in
+  G.iter_vertex (fun s ->
+    G.iter_vertex (fun d ->
+      let s_info = G.V.label s in
+      let d_info = G.V.label d in
+      let ms     = solved.(s_info.id).(d_info.id) in
+      if not (Set.equal ms zero) && MS.contains ms rs
+      then
+        Visualize.highlight_vertex s d
+    ) g
+  ) g;
+  Visualize.draw_selection ()
+
 
 (* Output gml *)
 let () =
@@ -168,7 +182,7 @@ let () =
       | 'q' -> raise Exit
       | _   -> ()
       else
-        if st.button 
+        if st.button
         then 
           match Visualize.select g with
           | None -> ()

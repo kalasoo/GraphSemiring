@@ -37,7 +37,7 @@ let random_color a =
   let r = Hashtbl.hash a in
   let g = r / 3 in 
   let b = r / 5 in
-  rgb (r % 64 + 64) (g % 64 + 64) (b % 64 + 64)
+  rgb (r % 256) (g % 256) (b % 256)
 
 let draw_arrow ?(color=black) ?(width=2) (xu,yu) (xv,yv) =
   set_color color;
@@ -66,8 +66,13 @@ let color_vertex v color =
   set_color color;
   fill_circle x y vertex_radius
 
-let draw_highlight ?(color=red) s d =
+let highlight_edge ?(color=red) s d =
   draw_arrow ~color:color (to_position s) (to_position d)
+
+let highlight_vertex s d =
+  let color = red in
+  color_vertex s color;
+  color_vertex d color
 
 type selection =
   | No
@@ -120,6 +125,12 @@ let draw_result s =
 
 exception Clicked of G.vertex
 
+let current_selection () =
+  match !selection with
+  | No           -> None
+  | One _        -> None
+  | Two (v1, v2) -> Some (v1, v2)
+
 let select g =
   let select_vertex v = match !selection with
     | No           -> selection := One v
@@ -139,8 +150,4 @@ let select g =
     G.iter_vertex click_vertex g;
     None
   with
-  | Clicked _ ->
-    match !selection with
-    | No           -> None
-    | One _        -> None
-    | Two (v1, v2) -> Some (v1, v2)
+  | Clicked _ -> current_selection()
