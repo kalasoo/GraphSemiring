@@ -17,15 +17,15 @@ let () =
       ["-g", Arg.Set_string input_gml_file,
        " <String> path to the input gml file";
        "-r", Arg.Set read_only,
-       " to read the visualize the original graph";
+       " set to enable the read only mode";
        "-m", Arg.Set_string mode,
-       " <String> Martelli resources modes: basic | random | color | vertex | edge";
+       " <String> resources types: basic | random | color | vertex | edge";
        "-a", Arg.Set_int resources_size,
        " <Int> amount of the resources";
        "-b", Arg.Set is_bidirectional,
-       " to set each edge as bidirectional";
+       " set to enable bidirectional graphs";
        "-o", Arg.Set output_gml,
-       " set to output solved graph";
+       " set to output the solved graph";
       ]
       (fun _ -> ())
       "usage: ./load.byte <options>"

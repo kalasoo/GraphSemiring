@@ -35,11 +35,11 @@ make
 $ ./load.byte --help
 usage: ./load.byte <options>
   -g  <String> path to the input gml file
-  -r  to read the visualize the original graph
-  -m  <String> Martelli resources modes: basic | random | color | vertex | edge
+  -r  set to enable the read only mode
+  -m  <String> resources types: basic | random | color | vertex | edge
   -a  <Int> amount of the resources
-  -b  to set each edge as bidirectional
-  -o  set to output solved graph
+  -b  set to enable bidirectional graphs
+  -o  set to output the solved graph
   -help  Display this list of options
   --help  Display this list of options
 ```
